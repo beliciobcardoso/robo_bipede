@@ -28,8 +28,9 @@ Convenções:
 - Unidade: mm.
 - Peças que fixam um servo usam o sistema de coordenadas do servo:
   origem no eixo de saída, no plano inferior das abas; +Z para o eixo; +X ao longo do corpo.
-- Medidas que variam entre clones estão marcadas `measure` no script — conferir com paquímetro.
+- Medidas de peças compradas vêm de paquímetro na peça real; o que não foi medido fica marcado `nominal` no script.
 
 | Peça | Script | Status |
 |------|--------|--------|
-| Servo SG90/MG90S (referência) | `cad/parts/servo_sg90.py` | medidas nominais, aguardando conferência |
+| Servo SG90 clone (referência) | `cad/parts/servo_sg90.py` | medido ([ficha](docs/medidas_servo_sg90.md)) |
+| Rolamento 623ZZ 3×10×4 (referência) | `cad/parts/bearing_623zz.py` | d/D/B norma ISO; anéis e encostos nominais |
