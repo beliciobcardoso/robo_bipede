@@ -33,3 +33,4 @@ Convenções:
 | Peça | Script | Status |
 |------|--------|--------|
 | Servo SG90 clone (referência) | `cad/parts/servo_sg90.py` | medido ([ficha](docs/medidas_servo_sg90.md)) |
+| Rolamento 623ZZ 3×10×4 (referência) | `cad/parts/bearing_623zz.py` | d/D/B norma ISO; anéis e encostos nominais |

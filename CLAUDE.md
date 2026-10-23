@@ -24,15 +24,17 @@ Override the FreeCAD binary with `make FREECAD_CMD=...`. No tests or linter yet.
 ## CAD architecture
 
 - One script per part in `cad/parts/<part>.py` → `cad/build/<part>.FCStd` + `.step`. `cad/build/` is gitignored; scripts are the source of truth. Output dir comes from env `CAD_OUT_DIR` (Makefile sets it).
-- Script shape (follow `servo_sg90.py`): a frozen `@dataclass` of dimensions exposed as module-level `DIMS`, a `build(doc, d=DIMS)` that creates a CSG tree of `Part::Box` / `Part::Cylinder` / `Part::Cut` / `Part::MultiFuse` document objects (so the tree stays inspectable in the GUI), `_validate` (single valid solid), and `main()` exporting FCStd + STEP. Other parts are meant to import `DIMS` to derive pockets/holes.
+- Script shape (follow `servo_sg90.py` / `bearing_623zz.py`): a frozen `@dataclass` of dimensions exposed as module-level `DIMS`, a `build(doc, d=DIMS)` returning the final object of a CSG tree, and `main()` calling `export_part`. Other parts are meant to import `DIMS` to derive pockets/holes.
+- `cad/cadlib.py` holds the shared helpers: `add_box` / `add_cylinder` / `add_tube` / `cut` / `fuse` create `Part::*` document objects (so the tree stays inspectable in the GUI), and `export_part` recomputes, validates a single valid solid, and writes FCStd + STEP. Part scripts put `cad/` on `sys.path` themselves because FreeCADCmd doesn't add the script dir. The Makefile rebuilds every part when `cadlib.py` changes.
 - Geometric constraints are encoded as derived `@property`s rather than duplicated numbers (e.g. `shaft_offset = tower_d / 2` because the gear tower is flush with the case wall).
 - Dimensions of purchased parts come from caliper measurements recorded in `docs/medidas_<part>.md`; unmeasured values are commented `nominal`. Keep the doc and the dataclass in sync when a value changes.
 - **Servo coordinate frame** (shared by every part that mounts a servo): origin on the output shaft axis at the tab underside (seat plane), +Z toward the shaft, +X along the body from the shaft end. The SG90 clone's cable exits on the shaft-side end face.
+- Joint pivots: a 623ZZ bearing opposite each servo shaft, M3 screw as pin. `BearingDims` carries the abutment limits (`da min` / `Da max`) that spacers and housing shoulders must respect so they touch only the correct ring.
 
 ## FreeCADCmd gotchas
 
 - It **exits 0 even when the script raises**. The Makefile detects failure by grepping for `Exception` and checking the output file exists — keep that when changing the build.
 - A script file runs with `__name__` equal to its module name, not `"__main__"`; guard with `if __name__ in ("__main__", DOC_NAME):`.
 - The flatpak has a private `/tmp`: scripts and files passed to `FreeCADCmd` must live under `$HOME` (e.g. inside the repo), never `/tmp`. Pass inputs via `flatpak run --env=VAR=...`.
-- `doc.saveAs` over an existing file leaves `.FCBak` backups; scripts delete the old `.FCStd` first.
+- `doc.saveAs` over an existing file leaves `.FCBak` backups; `export_part` deletes the old `.FCStd` first.
 - Headless visual check: tessellate the shape (`Part.read(step).tessellate(0.1)`) and render with matplotlib (bundled in the flatpak's Python) to a PNG.
