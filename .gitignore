@@ -1,0 +1,4 @@
+# Generated CAD output — regenerate with `make`
+cad/build/
+*.FCBak
+__pycache__/
