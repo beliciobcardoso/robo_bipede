@@ -1,4 +1,4 @@
-"""Micro servo SG90 / MG90S — functional reference model.
+"""Micro servo SG90 (clone) — functional reference model.
 
 Used as a placeholder in assemblies and as the source of dimensions for
 brackets (servo pocket, mounting holes, horn clearance). Not meant to be printed.
@@ -9,8 +9,8 @@ Coordinate system (shared by every part that mounts this servo):
     +X      = along the body length, from the shaft end towards the far end
     Y       = across the body width (symmetric)
 
-All dimensions in mm. Values marked "measure" vary between SG90/MG90S clones —
-check them with a caliper on the servo in hand and update here.
+All dimensions in mm, measured with a caliper on the servo in hand
+(see docs/medidas_servo_sg90.md). Values marked "nominal" were not measured.
 """
 
 import os
@@ -27,36 +27,41 @@ DEFAULT_OUT_DIR = "cad/build"
 @dataclass(frozen=True)
 class ServoDims:
     # Main case
-    body_l: float = 22.8          # measure
-    body_w: float = 12.2          # measure
-    body_h: float = 22.7          # bottom to top face of the case (no gear tower)
-    shaft_offset: float = 6.1     # shaft-side end face to shaft axis (measure)
+    body_l: float = 23.1
+    body_w: float = 12.2
+    body_h: float = 24.2          # bottom to top face of the case (no gear tower)
 
-    # Mounting tabs
-    tab_l_total: float = 32.2     # tip to tip (measure)
-    tab_t: float = 2.5            # thickness
-    tab_bottom_z: float = 15.9    # case bottom to tab underside (measure)
-    hole_spacing: float = 27.8    # center to center (measure)
+    # Mounting tabs (one centred hole per tab)
+    tab_l_total: float = 32.5     # tip to tip
+    tab_t: float = 2.5
+    tab_bottom_z: float = 17.0    # case bottom to tab underside
+    hole_spacing: float = 27.8    # center to center
     hole_d: float = 2.0           # M2 self-tapping screw
 
-    # Gear tower (top of case)
-    tower_d: float = 11.8
+    # Gear tower (top of case), flush with the shaft-side wall
+    tower_d: float = 12.0
     tower_h: float = 4.0
-    bump_d: float = 5.0           # secondary gear bump next to the tower
-    bump_x: float = 5.6           # shaft axis to bump axis
-    bump_h: float = 3.5
+    bump_d: float = 5.0           # secondary gear bump next to the tower (nominal)
+    bump_x: float = 5.6           # shaft axis to bump axis (nominal)
+    bump_h: float = 3.5           # nominal
 
-    # Output shaft (spline modelled as plain cylinder; real one is ~20-21T)
-    shaft_d: float = 4.8
-    shaft_h: float = 3.0          # above tower top (measure)
-    shaft_screw_d: float = 1.6
-    shaft_screw_depth: float = 3.0
+    # Output shaft (spline modelled as plain cylinder over the teeth)
+    shaft_d: float = 5.0
+    shaft_h: float = 3.0          # above tower top
+    spline_teeth: int = 21
+    shaft_screw_d: float = 1.6    # nominal
+    shaft_screw_depth: float = 3.0  # nominal
 
-    # Cable exit: stub on the end face opposite the shaft (confirm side)
-    cable_w: float = 3.6
-    cable_t: float = 1.2
-    cable_len: float = 5.0
-    cable_z: float = 4.5          # case bottom to cable centre (measure)
+    # Cable exit: stub on the shaft-side end face
+    cable_w: float = 4.0
+    cable_t: float = 1.2          # nominal
+    cable_len: float = 5.0        # keep-out length, not the real cable
+    cable_z: float = 4.0          # case bottom to cable centre
+
+    @property
+    def shaft_offset(self) -> float:
+        """Shaft-side end face to shaft axis (tower is flush with that face)."""
+        return self.tower_d / 2
 
     @property
     def body_x0(self) -> float:
@@ -141,7 +146,7 @@ def build(doc, d: ServoDims = DIMS):
     shaft_drilled.Tool = shaft_screw
 
     cable = _add_box(doc, "CableStub", d.cable_len, d.cable_w, d.cable_t,
-                     d.body_x0 + d.body_l, -d.cable_w / 2,
+                     d.body_x0 - d.cable_len, -d.cable_w / 2,
                      d.body_z0 + d.cable_z - d.cable_t / 2)
 
     servo = _fuse(doc, "ServoSG90", [body, tabs_drilled, tower, bump, shaft_drilled, cable])
