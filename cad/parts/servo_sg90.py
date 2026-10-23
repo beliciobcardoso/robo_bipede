@@ -14,14 +14,15 @@ All dimensions in mm, measured with a caliper on the servo in hand
 """
 
 import os
+import sys
 from dataclasses import dataclass
 
 import FreeCAD as App
-import Import
-import Part
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from cadlib import add_box, add_cylinder, cut, export_part, fuse  # noqa: E402
 
 DOC_NAME = "servo_sg90"
-DEFAULT_OUT_DIR = "cad/build"
 
 
 @dataclass(frozen=True)
@@ -99,87 +100,37 @@ class ServoDims:
 DIMS = ServoDims()
 
 
-def _add_box(doc, name, l, w, h, x, y, z):
-    obj = doc.addObject("Part::Box", name)
-    obj.Length, obj.Width, obj.Height = l, w, h
-    obj.Placement.Base = App.Vector(x, y, z)
-    return obj
-
-
-def _add_cylinder(doc, name, d, h, x, y, z):
-    obj = doc.addObject("Part::Cylinder", name)
-    obj.Radius, obj.Height = d / 2, h
-    obj.Placement.Base = App.Vector(x, y, z)
-    return obj
-
-
-def _fuse(doc, name, shapes):
-    obj = doc.addObject("Part::MultiFuse", name)
-    obj.Shapes = shapes
-    obj.Refine = True
-    return obj
-
-
 def build(doc, d: ServoDims = DIMS):
     """Create the servo as a parametric CSG tree; returns the final object."""
-    body = _add_box(doc, "Body", d.body_l, d.body_w, d.body_h,
-                    d.body_x0, -d.body_w / 2, d.body_z0)
+    body = add_box(doc, "Body", d.body_l, d.body_w, d.body_h,
+                   d.body_x0, -d.body_w / 2, d.body_z0)
 
-    tabs = _add_box(doc, "Tabs", d.tab_l_total, d.body_w, d.tab_t,
-                    d.body_center_x - d.tab_l_total / 2, -d.body_w / 2, 0)
+    tabs = add_box(doc, "Tabs", d.tab_l_total, d.body_w, d.tab_t,
+                   d.body_center_x - d.tab_l_total / 2, -d.body_w / 2, 0)
     holes = [
-        _add_cylinder(doc, f"TabHole{i}", d.hole_d, d.tab_t + 2, p.x, p.y, -1)
+        add_cylinder(doc, f"TabHole{i}", d.hole_d, d.tab_t + 2, p.x, p.y, -1)
         for i, p in enumerate(d.hole_positions)
     ]
-    tabs_drilled = doc.addObject("Part::Cut", "TabsDrilled")
-    tabs_drilled.Base = tabs
-    tabs_drilled.Tool = _fuse(doc, "TabHoles", holes)
+    tabs_drilled = cut(doc, "TabsDrilled", tabs, fuse(doc, "TabHoles", holes))
 
-    tower = _add_cylinder(doc, "Tower", d.tower_d, d.tower_h, 0, 0, d.body_top_z)
-    bump = _add_cylinder(doc, "GearBump", d.bump_d, d.bump_h, d.bump_x, 0, d.body_top_z)
+    tower = add_cylinder(doc, "Tower", d.tower_d, d.tower_h, 0, 0, d.body_top_z)
+    bump = add_cylinder(doc, "GearBump", d.bump_d, d.bump_h, d.bump_x, 0, d.body_top_z)
 
-    shaft = _add_cylinder(doc, "Shaft", d.shaft_d, d.shaft_h, 0, 0, d.tower_top_z)
-    shaft_screw = _add_cylinder(doc, "ShaftScrewHole", d.shaft_screw_d, d.shaft_screw_depth + 1,
-                                0, 0, d.shaft_top_z - d.shaft_screw_depth)
-    shaft_drilled = doc.addObject("Part::Cut", "ShaftDrilled")
-    shaft_drilled.Base = shaft
-    shaft_drilled.Tool = shaft_screw
+    shaft = add_cylinder(doc, "Shaft", d.shaft_d, d.shaft_h, 0, 0, d.tower_top_z)
+    shaft_screw = add_cylinder(doc, "ShaftScrewHole", d.shaft_screw_d, d.shaft_screw_depth + 1,
+                               0, 0, d.shaft_top_z - d.shaft_screw_depth)
+    shaft_drilled = cut(doc, "ShaftDrilled", shaft, shaft_screw)
 
-    cable = _add_box(doc, "CableStub", d.cable_len, d.cable_w, d.cable_t,
-                     d.body_x0 - d.cable_len, -d.cable_w / 2,
-                     d.body_z0 + d.cable_z - d.cable_t / 2)
+    cable = add_box(doc, "CableStub", d.cable_len, d.cable_w, d.cable_t,
+                    d.body_x0 - d.cable_len, -d.cable_w / 2,
+                    d.body_z0 + d.cable_z - d.cable_t / 2)
 
-    servo = _fuse(doc, "ServoSG90", [body, tabs_drilled, tower, bump, shaft_drilled, cable])
-    doc.recompute()
-    return servo
-
-
-def _validate(obj):
-    shape = obj.Shape
-    if shape.isNull() or not shape.isValid() or len(shape.Solids) != 1:
-        raise RuntimeError(f"{obj.Name}: invalid shape (solids={len(shape.Solids)})")
+    return fuse(doc, "ServoSG90", [body, tabs_drilled, tower, bump, shaft_drilled, cable])
 
 
 def main():
-    out_dir = os.environ.get("CAD_OUT_DIR", DEFAULT_OUT_DIR)
-    os.makedirs(out_dir, exist_ok=True)
-
     doc = App.newDocument(DOC_NAME)
-    servo = build(doc)
-    _validate(servo)
-
-    fcstd_path = os.path.join(out_dir, f"{DOC_NAME}.FCStd")
-    step_path = os.path.join(out_dir, f"{DOC_NAME}.step")
-    if os.path.exists(fcstd_path):
-        os.remove(fcstd_path)  # avoid FreeCAD piling up .FCBak backups on every build
-    doc.saveAs(os.path.abspath(fcstd_path))
-    Import.export([servo], os.path.abspath(step_path))
-
-    bb = servo.Shape.BoundBox
-    print(f"[{DOC_NAME}] volume={servo.Shape.Volume:.1f} mm3 "
-          f"bbox x[{bb.XMin:.1f},{bb.XMax:.1f}] y[{bb.YMin:.1f},{bb.YMax:.1f}] "
-          f"z[{bb.ZMin:.1f},{bb.ZMax:.1f}]")
-    print(f"[{DOC_NAME}] saved {fcstd_path}, {step_path}")
+    export_part(doc, build(doc), DOC_NAME)
 
 
 # FreeCADCmd runs a script file with __name__ == its module name, not "__main__"
