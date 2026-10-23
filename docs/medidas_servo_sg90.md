@@ -16,7 +16,7 @@ Servo deitado de lado, sem horn.
 | 1 | Comprimento do corpo (`body_l`) | Ponta a ponta do corpo, sem as abas | 22,8 | 23,1 |
 | 2 | Largura do corpo (`body_w`) | Lado a lado | 12,2 | 12,2 |
 | 3 | Altura do corpo (`body_h`) | Da base até a face de cima da caixa, sem a torre | 22,7 | 24,2 |
-| 4 | Distância do eixo à ponta (`shaft_offset`) | Da face da ponta do lado do eixo até o centro do eixo | 6,1 | 5,5 |
+| 4 | Distância do eixo à ponta (`shaft_offset`) | Da face da ponta do lado do eixo até o centro do eixo | 6,1 | ~~5,5~~ 6,0 — torre rente à parede, derivado de `tower_d / 2` |
 
 ## Abas de fixação
 
@@ -32,7 +32,7 @@ Servo deitado de lado, sem horn.
 
 | # | Medida | Como medir | Nominal | Medido |
 |---|--------|-----------|---------|--------|
-| 10 | Diâmetro da torre (`tower_d`) | Cilindro grande em volta do eixo | 11,8 | 11,8 |
+| 10 | Diâmetro da torre (`tower_d`) | Cilindro grande em volta do eixo | 11,8 | 12,0 |
 | 11 | Altura da torre (`tower_h`) | Da face de cima da caixa até o topo da torre | 4,0 | 4,0 |
 | 12 | Diâmetro do eixo (`shaft_d`) | Por cima dos dentes do spline | 4,8 | 5,0 |
 | 13 | Altura do eixo (`shaft_h`) | Do topo da torre até o topo do eixo | 3,0 | 3,0 |

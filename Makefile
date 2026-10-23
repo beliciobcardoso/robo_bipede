@@ -12,7 +12,7 @@ $(PARTS): %: $(BUILD_DIR)/%.FCStd
 
 # FreeCADCmd exits 0 even when the script raises, so failure is detected
 # from its output and from the missing model file.
-$(BUILD_DIR)/%.FCStd: cad/parts/%.py
+$(BUILD_DIR)/%.FCStd: cad/parts/%.py cad/cadlib.py
 	@rm -f $@
 	@out=$$(CAD_OUT_DIR=$(BUILD_DIR) $(FREECAD_CMD) $< 2>&1); \
 	if echo "$$out" | grep -q "Exception" || [ ! -f $@ ]; then \
