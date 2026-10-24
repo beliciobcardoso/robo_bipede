@@ -240,7 +240,7 @@ Rodei os testes que você ainda não consegue fazer pelo visualizador
   tem junta de quadril para o lado. Inclinado assim, o peso fica em cima do pé de apoio e o
   servo trabalha pouco (joelho 11 %). Inclinação menor que 8° ou maior que 20°: tomba.
 - **Balançar de um pé para o outro**, como na passada, funciona até ~1 passo por segundo: o
-  tornozelo roll chega a 50 % do SG90 e o joelho a 68 %. Mais rápido que isso, os servos não dão
+  tornozelo roll chega a 57 % do SG90 e o joelho a 69 %. Mais rápido que isso, os servos não dão
   conta (`.venv/bin/python sim/tools/rocking_test.py`).
 
 ## Problemas comuns

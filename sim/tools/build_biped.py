@@ -36,9 +36,10 @@ class BipedParams:
     # Lengths between joint axes (mm) — thigh = shin = 45, approved after F2 (docs/arquitetura_perna.md)
     thigh_mm: float = 45.0          # hip pitch -> knee
     shin_mm: float = 45.0           # knee -> ankle pitch
-    ankle_link_mm: float = 12.0     # ankle pitch -> ankle roll
+    ankle_link_mm: float = 22.0     # ankle pitch -> ankle roll (ankle yoke + roll-servo holder, docs/suporte_servo.md)
     roll_to_sole_mm: float = 14.0   # ankle roll axis -> bottom of the sole
-    hip_half_width_mm: float = 22.5  # torso centre -> each hip (45 mm between legs, approved after F2)
+    hip_half_width_mm: float = 25.0  # torso centre -> each hip (50 mm between legs; legs are ~42 mm wide)
+    leg_width_mm: float = 42.0      # along the pitch axes: horn + servo + bearing stack
     hip_drop_mm: float = 10.0       # torso bottom -> hip pitch axis
 
     # Torso box (mm) and what it carries (g)
@@ -54,7 +55,7 @@ class BipedParams:
     ankle_struct_g: float = 6.0
     foot_struct_g: float = 15.0
     leg_cover_g: float = 15.0       # split over thigh / shin / foot; covers 50 g total = validated limit
-    foot_size_mm: tuple = (70.0, 40.0, 6.0)   # 40 wide = hip spacing - 5 mm, feet never touch
+    foot_size_mm: tuple = (70.0, 45.0, 6.0)   # 45 wide = hip spacing - 5 mm, feet never touch
 
     # Servo model (SG90-like position servo; to be calibrated in F3)
     stall_torque_nm: float = 0.18
@@ -102,11 +103,11 @@ def _leg(p: BipedParams, side: str, sign: int) -> str:
     return f"""
       <body name="thigh{s}" pos="{_v(0, sign * p.hip_half_width_mm, -p.torso_size_mm[2] / 2 - p.hip_drop_mm)}">
         <joint name="hip_pitch{s}" class="hip_pitch"/>
-        <geom name="thigh{s}" type="box" size="{_v(7, 9, p.thigh_mm / 2)}" pos="{_v(0, 0, -p.thigh_mm / 2)}" mass="{_kg(p.thigh_struct_g + cover)}" material="link" class="visual"/>
+        <geom name="thigh{s}" type="box" size="{_v(7, p.leg_width_mm / 2, p.thigh_mm / 2)}" pos="{_v(0, 0, -p.thigh_mm / 2)}" mass="{_kg(p.thigh_struct_g + cover)}" material="link" class="visual"/>
         {_servo_geom(f"servo_knee{s}", -p.thigh_mm + SERVO_HALF_MM[2] - 4)}
         <body name="shin{s}" pos="{_v(0, 0, -p.thigh_mm)}">
           <joint name="knee{s}" class="knee"/>
-          <geom name="shin{s}" type="box" size="{_v(7, 9, p.shin_mm / 2)}" pos="{_v(0, 0, -p.shin_mm / 2)}" mass="{_kg(p.shin_struct_g + cover)}" material="link" class="visual"/>
+          <geom name="shin{s}" type="box" size="{_v(7, p.leg_width_mm / 2, p.shin_mm / 2)}" pos="{_v(0, 0, -p.shin_mm / 2)}" mass="{_kg(p.shin_struct_g + cover)}" material="link" class="visual"/>
           {_servo_geom(f"servo_ankle_pitch{s}", -p.shin_mm + SERVO_HALF_MM[2] - 4)}
           <body name="ankle{s}" pos="{_v(0, 0, -p.shin_mm)}">
             <joint name="ankle_pitch{s}" class="ankle_pitch"/>

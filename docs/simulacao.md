@@ -100,8 +100,12 @@ Conclusões:
 - **As capas pesam na conta:** com capas pesadas (100 g em vez de 50 g, 409 g no total) nenhuma
   combinação a 45 mm passa a 1 passo/s (74–77 %); todas continuam passando a 0,5 passo/s.
 - **Medidas aprovadas (24/10):** quadris 45 mm, coxa = canela = 45 mm, pé 40 × 70 mm, capas
-  com meta de 35 g e limite de 50 g. O modelo `f1_biped.xml` passou a usá-las: inclinação numa
-  perna 14°, balanço lateral com tornozelo roll a 45 % (0,5 passo/s) e 50 % (1 passo/s).
+  com meta de 35 g e limite de 50 g.
+- **Revisão no conceito do suporte (24/10):** com as peças reais a perna tem ~42 mm de largura,
+  então os quadris foram para **50 mm** (pé 45 mm) e o tornozelo pitch→roll de 12 para **22 mm**.
+  A estimativa física conservadora da tabela acima marca 50 mm como reprovado a 1 passo/s (71–80 %),
+  mas o balanço simulado no robô atualizado dá **tornozelo roll 57 %** e joelho 69 % a 1 passo/s,
+  e 50 % / 36 % a 0,5 passo/s; inclinação numa perna 14°. As duas condições dos 8 DOF passam.
 
  usar o que existe, medir, só então criar
 
