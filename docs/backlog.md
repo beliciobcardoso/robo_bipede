@@ -43,11 +43,13 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [x] Instalar MuJoCo + JAX com CUDA no `.venv` — versões fixadas em `requirements.txt` **(Claude)**
   - [x] Teste de fumaça: simulação rodando na RTX 3060 — `sim/tools/smoke_test.py`, motor Warp 4,7 M passos/s **(Claude)**
   - [ ] Fazer o [tutorial do MuJoCo](tutorial_mujoco.md): abrir, mexer as juntas, ler o torque, experimento de agachar **(você)**
-- **F1 — Uma perna de caixinhas**
-  - [ ] Modelo MuJoCo de 1 perna (4 juntas) com blocos e massas estimadas **(Claude)**
-  - [ ] Abrir no visualizador, mexer as juntas e ler os torques **(você)**
+- **F1 — Robô completo de caixinhas**
+  - [x] Modelo MuJoCo do bípede (2 pernas × 4 juntas, 359 g) gerado por `sim/tools/build_biped.py` **(Claude)**
+  - [x] Medir torques: agachar, levantar em várias velocidades, ficar numa perna (`sim/tools/f1_experiments.py`) **(Claude)**
+  - [ ] Abrir o robô completo no monitor (Passo 8 do tutorial do MuJoCo) **(você)**
+  - [ ] Decidir depois da F2: manter 8 DOF (corpo inclina ~18° para apoiar numa perna) ou acrescentar quadril roll **(juntos)**
 - **F2 — Varredura na GPU**
-  - [ ] Varrer coxa/canela × agachamento × peso → torque necessário vs SG90, **incluindo a massa estimada das capas** **(Claude)**
+  - [ ] Varrer coxa/canela × largura do quadril × agachamento × peso → torque necessário vs SG90 (parado **e** em movimento), **incluindo a massa estimada das capas** **(Claude)**
   - [ ] Escolher as medidas da perna com base no mapa **(juntos)**
 - **F3 — Modelo do servo SG90**
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**

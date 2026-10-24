@@ -3,7 +3,7 @@
 Objetivo: testar mecânica e controle no computador **antes** de imprimir e montar, usando a
 RTX 3060 (12 GB) onde ela faz diferença, e evoluir junto com o aprendizado de modelagem e robótica.
 
-> Status: plano **aprovado** (24/10). **F0 concluída** — resultados abaixo.
+> Status: plano **aprovado** (24/10). **F0 e F1 concluídas** — resultados abaixo.
 
 ## Resultado da F0 (24/10)
 
@@ -28,6 +28,32 @@ Conclusões:
 - Sanidade física: agachado sobre uma perna, o joelho pede 0,043 N·m (24 % do SG90) neste
   modelo de caixinhas — número a ser refeito com massas reais na F1/F2.
 - Versões fixadas em `requirements.txt`.
+
+## Resultado da F1 (24/10) — robô completo de caixinhas
+
+Modelo `sim/models/f1_biped.xml`, gerado por `sim/tools/build_biped.py` a partir de parâmetros
+(comprimentos em mm, massas em g). Duas pernas × 4 juntas, **359 g** no total, coxa e canela de
+45 mm, quadris a 55 mm um do outro. Testes em `sim/tools/f1_experiments.py` e `monitor.py --model f1 --sweep`.
+
+| Situação | Junta mais exigida | % do SG90 |
+|----------|--------------------|-----------|
+| Em pé, duas pernas | — | 0 % |
+| Agachado 40° (limite), duas pernas, parado | joelho | 17 % |
+| Levantar de 34° em 1,2 s | joelho (pico) | 43 % |
+| Levantar de 34° em 0,6 s | joelho (pico) | 71 % |
+| Levantar de 34° em 0,3 s | todas | **100 % — servo no limite** |
+| Levantar de 34° em 0,15 s | — | **cai** |
+| Numa perna, inclinado 18° (meio da faixa estável) | joelho / tornozelo roll | 11 % / 2 % |
+| Numa perna, nas bordas da faixa (10° ou 26°) | tornozelo roll | 32 % |
+
+Conclusões:
+- **Parado, o SG90 sobra.** O que aperta é **movimento rápido**: levantar em menos de ~0,5 s já
+  satura o joelho. A passada (F5) precisa respeitar essa velocidade.
+- **Sem quadril roll, ficar numa perna exige inclinar o corpo inteiro ~18° para o lado** (faixa
+  estável de 10° a 26°). Com os dois pés no chão, os tornozelos roll ficam travados — não dá para
+  deslocar o peso para o lado sem tirar um pé. É o andar "rebolado" (tipo Otto).
+- A inclinação necessária depende da **largura do quadril** e da altura do centro de massa:
+  quadris mais próximos pedem menos inclinação. Isso entra na varredura da F2.
 
 ## 1. Princípio: usar o que existe, medir, só então criar
 
