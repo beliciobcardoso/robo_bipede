@@ -85,10 +85,14 @@ Peças compradas têm modelo de referência por script.
 
 - [x] Faixas de cada junta com batente mecânico + limite de software 5° antes (provisório, em `docs/arquitetura_perna.md`) **(juntos)**
 - [ ] Validar as faixas das juntas na passada simulada (F5) e ajustar **(juntos)**
-- [ ] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2, **com o espaço reservado para as capas em volta de cada segmento** **(juntos)**
-- [ ] Padrão de encaixe das capas — definir **antes** do suporte (ver 3.1) **(juntos)**
-- [ ] Tutorial do suporte do servo + rolamento **(Claude)**
-- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa e os batentes da junta** **(você)**
+- [x] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2, **com o espaço reservado para as capas em volta de cada segmento** **(juntos)**
+- [x] Padrão de encaixe das capas — clipe + pinos-guia, modelo de referência pronto (ver 3.1) **(juntos)**
+- [x] Conceito do suporte do servo: suporte + garfo padrão, pivô M3 + rolamento, quadris 50 mm, tornozelo 22 mm — aprovado em 24/10 ([suporte_servo.md](suporte_servo.md)) **(juntos)**
+- [x] Ficha de medidas do horn de braço simples ([medidas_horn_sg90.md](medidas_horn_sg90.md)) **(Claude)**
+- [ ] Medir o horn **(você)**
+- [ ] Tutorial do suporte e do garfo **(Claude)**
+- [ ] Suporte do servo — peça padrão das juntas pitch, **com os encaixes da capa e os batentes da junta** **(você)**
+- [ ] Garfo com alojamento do rolamento 623ZZ e rebaixo do horn — peça padrão **(você)**
 - [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **batentes da junta**, **encaixes da capa** **(Claude)**
 - [ ] Coxa (quadril → joelho), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Canela (joelho → tornozelo), com encaixes da capa e caminho dos fios **(você)**
