@@ -3,7 +3,7 @@
 Acompanhamento do robô bípede. Marque `[x]` ao concluir. Cada item diz **quem** faz:
 **(você)**, **(Claude)** ou **(juntos)**. Itens dentro de uma seção estão na ordem sugerida.
 
-Documentos de apoio: [materiais](lista_materiais.md) · [medidas do servo](medidas_servo_sg90.md) ·
+Documentos de apoio: [materiais](lista_materiais.md) · [capas](capas.md) · [medidas do servo](medidas_servo_sg90.md) ·
 [tutorial PartDesign](tutorial_servo_partdesign.md) · [tutorial MuJoCo](tutorial_mujoco.md) · [plano de simulação](simulacao.md)
 
 ---
@@ -104,8 +104,9 @@ Peças compradas têm modelo de referência por script.
 Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, presas por
 **encaixe** (sem cola). O esqueleto é projetado para recebê-las desde o início.
 
-- [ ] Definir o tipo de encaixe: clipe de pressão (snap-fit em balanço), trava em trilho ou ímã — com prós e contras **(juntos)**
-- [ ] Definir o padrão: dimensões do clipe e do rebaixo, folga, espessura da parede da capa, quantos encaixes por capa **(juntos)**
+- [x] Definir o tipo de encaixe — **decidido em 24/10: clipe de pressão + 2 pinos-guia por capa**; ímã é o plano B ([capas.md](capas.md)) **(juntos)**
+- [x] Definir as dimensões do clipe e do pino-guia — **aprovadas em 24/10** ([capas.md](capas.md)) **(juntos)**
+- [ ] Confirmar parede da capa (1,2 mm) e encaixes por capa (2 clipes + 2 pinos; tronco 4 + 2) ao desenhar as capas **(juntos)**
 - [ ] Modelo de referência do encaixe padrão, para todas as peças usarem o mesmo **(Claude)**
 - [ ] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)**
 - [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga da bateria, troca de servo, calibração **(juntos)**
