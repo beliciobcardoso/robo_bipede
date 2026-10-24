@@ -1,0 +1,90 @@
+# Simulação e algoritmos — plano
+
+Objetivo: testar mecânica e controle no computador **antes** de imprimir e montar, usando a
+RTX 3060 (12 GB) onde ela faz diferença, e evoluir junto com o aprendizado de modelagem e robótica.
+
+> Status: **proposta** — nenhuma fase implementada ainda.
+
+## 1. Princípio: usar o que existe, medir, só então criar
+
+1. Começa com ferramenta aberta e consolidada.
+2. Mede contra o robô real (ou contra uma conta conhecida).
+3. **Cria algoritmo próprio só quando** um destes for verdade:
+   - nenhuma ferramenta modela aquilo (ex.: o comportamento do *nosso* SG90 clone);
+   - a ferramenta diverge da medição real além do aceitável, e a causa é a ferramenta;
+   - o objetivo é aprender (fazer à mão uma vez para entender, depois comparar com a pronta).
+4. Todo algoritmo próprio é comparado (A/B) com a solução pronta, com números.
+
+**Não vamos escrever motor de física.** É um trabalho de anos, e o MuJoCo já é referência na área.
+O que vale a pena ser nosso é o que ninguém tem pronto para este robô.
+
+## 2. Ferramentas
+
+| Ferramenta | Para quê | CPU/GPU |
+|------------|----------|---------|
+| **MuJoCo** | Motor de física padrão em robôs com pernas. Visualizador para ver e mexer no robô. | CPU (rápido) |
+| **MJX** (MuJoCo em JAX) | Mesma física, rodando **milhares de robôs em paralelo** na placa de vídeo. | **GPU** |
+| **MuJoCo Playground / Brax** | Treino de andar por aprendizado por reforço (PPO) em cima do MJX. | **GPU** |
+| **CuPy** | Cálculos próprios na GPU (já usado em `tools/compare_meshes.py`). | **GPU** |
+| **Isaac Lab** (NVIDIA) | Alternativa mais pesada. Fica para depois, só se o MJX não der conta. | GPU |
+
+Por que MuJoCo/MJX e não Isaac Lab primeiro: instala com `pip` no `.venv` que já existe,
+é leve, roda bem em 12 GB, e o mesmo modelo serve para ver (CPU) e para treinar (GPU).
+Isaac exige instalação de dezenas de GB e é mais do que precisamos agora.
+
+## 3. Onde a placa de vídeo ajuda (e onde não)
+
+| Ajuda muito | Não precisa |
+|-------------|-------------|
+| **Varreduras**: testar centenas de combinações (comprimento da perna × postura × peso) e ver qual dá folga de torque | Ver o robô se mexendo na tela (CPU dá conta) |
+| **Robustez (Monte Carlo)**: o mesmo passo com milhares de variações de massa, folga do servo, atrito | Cinemática inversa de uma perna (conta pequena) |
+| **Treinar o andar por reforço**: milhares de robôs simulados aprendendo ao mesmo tempo | Firmware do ESP32 |
+| Comparar peças do CAD (já fazemos) | |
+
+## 4. O que será nosso (algoritmos próprios planejados)
+
+| Peça | Por que não tem pronto | Como valida |
+|------|------------------------|-------------|
+| **Modelo do SG90 clone** — torque × velocidade, folga das engrenagens, zona morta, atraso, limite de corrente | Simuladores modelam motor ideal; o SG90 de plástico está longe disso | Bancada com o servo real + ESP32 medindo posição e corrente (INA219) |
+| **Ponte CAD → simulação** — ler massa, centro de massa e inércia das peças do FreeCAD e gerar o modelo MuJoCo | Ninguém conhece o nosso CAD; à mão erra e desatualiza | Massa simulada = massa da balança |
+| **Gerador de passada clássico** — pêndulo invertido linear + ZMP + cinemática inversa 2 elos | Existe na literatura, mas fazer à mão é o melhor jeito de aprender | Robô simulado anda sem cair; depois o real |
+| **Estimador de inclinação do MPU-6050** — filtro complementar, depois Kalman | Há bibliotecas, mas precisamos ajustar ao ruído do nosso sensor | Ruído real gravado do MPU injetado na simulação |
+| **Varredura de projeto na GPU** — escolher medidas da perna pela margem de torque | Ferramenta específica do nosso problema | Comparar com a conta à mão |
+
+## 5. Fases
+
+Cada fase entrega algo que funciona e ensina um assunto. A ordem segue o projeto mecânico.
+
+| Fase | Entrega | Você aprende | Depende de |
+|------|---------|--------------|-----------|
+| **F0 — Ambiente** | MuJoCo + JAX com CUDA no `.venv`; teste que roda na 3060 | Como a simulação usa CPU e GPU | — |
+| **F1 — Uma perna de caixinhas** | Modelo MuJoCo de 1 perna (4 juntas) com blocos no lugar das peças; mexer juntas e ler torques | Junta, elo, inércia, torque | Medidas propostas da perna |
+| **F2 — Varredura na GPU** | Mapa "comprimento da coxa/canela × agachamento → torque necessário vs SG90" | Estática, margem de segurança | F1 |
+| **F3 — Modelo do servo** | Modelo do SG90 calibrado na bancada (ESP32 + INA219) | Sim-to-real, identificação de sistema | F1 + servo na bancada |
+| **F4 — CAD → simulação** | Script que gera o modelo do robô a partir das peças do FreeCAD | Propriedades de massa | Primeiras peças estruturais |
+| **F5 — Passada clássica** | Robô completo andando na simulação com LIPM/ZMP | Cinemática inversa, equilíbrio dinâmico | F3 + F4 |
+| **F6 — Equilíbrio com IMU** | Filtro + controlador de tornozelo (PD, depois LQR) contra empurrões simulados | Filtros, controle | F5 + MPU gravado |
+| **F7 — Andar por reforço (GPU)** | Política treinada no MJX com variações aleatórias; comparação com F5 | Aprendizado por reforço, robustez | F5 |
+| **F8 — Para o robô real** | Passada (F5) ou política pequena (F7) rodando no ESP32 | Embarcado em tempo real | Robô montado |
+
+## 6. Estrutura no repositório
+
+```
+sim/
+  models/   modelos MuJoCo (gerados e escritos à mão)
+  servo/    modelo do SG90 e dados da bancada
+  gait/     gerador de passada, cinemática inversa
+  tools/    varreduras, ponte CAD → MuJoCo
+```
+
+Tudo roda com o mesmo `.venv` das ferramentas de CAD.
+
+## 7. Riscos
+
+| Risco | Efeito | Como lidamos |
+|-------|--------|--------------|
+| **Sim-to-real**: simulação nunca é igual ao real | Passo que funciona na tela cai no chão | Modelo do servo calibrado (F3), variações aleatórias (F7), sempre testar no real |
+| Clones de SG90 variam entre si | Um servo mais fraco que os outros | Medir os 8 na bancada; colocar os melhores nos joelhos/tornozelos |
+| Versões de JAX/CUDA × driver | Ambiente quebra numa atualização | Versões fixadas no projeto; teste de fumaça na F0 |
+| 12 GB de VRAM | Limita robôs em paralelo no treino | Robô pequeno; poucos milhares de robôs em paralelo cabem |
+| Escopo cresce demais | Muita simulação e nenhum robô andando | Cada fase só começa quando o projeto mecânico pede |
