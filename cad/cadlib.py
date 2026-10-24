@@ -5,6 +5,7 @@ script's directory) and import from here.
 """
 
 import os
+import sys
 
 import FreeCAD as App
 import Import
@@ -72,3 +73,13 @@ def export_part(doc, obj, part_name):
           f"bbox x[{bb.XMin:.1f},{bb.XMax:.1f}] y[{bb.YMin:.1f},{bb.YMax:.1f}] "
           f"z[{bb.ZMin:.1f},{bb.ZMax:.1f}]")
     print(f"[{part_name}] saved {os.path.relpath(fcstd_path)}, {os.path.relpath(step_path)}")
+
+
+def run_as_script(module_name: str, part_name: str) -> bool:
+    """True when this part script is the one FreeCADCmd was asked to run, not just imported.
+
+    FreeCADCmd runs a script with __name__ == its module name, which is also what an import gives,
+    so the script path in sys.argv tells the two apart."""
+    if module_name == "__main__":
+        return True
+    return module_name == part_name and os.path.basename(sys.argv[-1]) == f"{part_name}.py"
