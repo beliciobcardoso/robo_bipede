@@ -107,7 +107,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 - [x] Definir o tipo de encaixe — **decidido em 24/10: clipe de pressão + 2 pinos-guia por capa**; ímã é o plano B ([capas.md](capas.md)) **(juntos)**
 - [x] Definir as dimensões do clipe e do pino-guia — **aprovadas em 24/10** ([capas.md](capas.md)) **(juntos)**
 - [ ] Confirmar parede da capa (1,2 mm) e encaixes por capa (2 clipes + 2 pinos; tronco 4 + 2) ao desenhar as capas **(juntos)**
-- [ ] Modelo de referência do encaixe padrão, para todas as peças usarem o mesmo **(Claude)**
+- [x] Modelo de referência do encaixe padrão: `cad/parts/snap_clip.py` (capa) e `snap_socket.py` (esqueleto), com checagem do encaixe montado **(Claude)**
 - [ ] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)**
 - [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga da bateria, troca de servo, calibração **(juntos)**
 - [ ] Caminho dos fios por dentro das capas sem prender as juntas em nenhuma posição **(juntos)**

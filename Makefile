@@ -20,5 +20,8 @@ $(BUILD_DIR)/%.FCStd: cad/parts/%.py cad/cadlib.py
 	fi; \
 	echo "$$out" | grep '^\['
 
+# Parts that import another part's DIMS rebuild when that part changes
+$(BUILD_DIR)/snap_socket.FCStd: cad/parts/snap_clip.py
+
 clean:
 	rm -rf $(BUILD_DIR)
