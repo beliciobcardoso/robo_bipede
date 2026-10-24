@@ -32,14 +32,15 @@ class Robot:
         self.torso = m.body("torso").id
         self.lo, self.hi = m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1]
 
-    def ctrl(self, crouch: dict, roll: float = 0.0, lift_r: float = 0.0) -> np.ndarray:
-        """crouch: A per side; roll: both ankle rolls; lift_r: extra crouch on the right leg."""
+    def ctrl(self, crouch: dict, roll=0.0, lift_r: float = 0.0) -> np.ndarray:
+        """crouch: A per side; roll: ankle roll for both sides, or a dict per side;
+        lift_r: extra crouch on the right leg."""
         u = np.zeros(self.m.nu)
         for side, a in crouch.items():
             a_side = a + (lift_r if side == "r" else 0.0)
             for t in TYPES:
                 u[self.idx[f"{t}_{side}"]] = CROUCH[t] * a_side
-            u[self.idx[f"ankle_roll_{side}"]] = roll
+            u[self.idx[f"ankle_roll_{side}"]] = roll[side] if isinstance(roll, dict) else roll
         return np.clip(u, self.lo, self.hi)
 
     def tilt(self, d) -> float:
@@ -72,22 +73,28 @@ def ramp(t, t0, t1, v0, v1):
     return v0 + (v1 - v0) * (t - t0) / (t1 - t0)
 
 
-def rise_speed(m):
+def rise_peak(m, speed: float, a0: float = 0.6):
+    """Crouch to A = a0 slowly, then stand up at `speed` (rad/s of A).
+    Returns (peak torque per joint type over both legs, fell)."""
     r = Robot(m)
+    t_down, hold = a0 / 0.5, 1.5
+    t_up0 = t_down + hold
+    t_up1 = t_up0 + a0 / speed
+
+    def sched(t):
+        a = ramp(t, 0, t_down, 0, a0) if t < t_up0 else ramp(t, t_up0, t_up1, a0, 0)
+        return r.ctrl({"l": a, "r": a})
+
+    _, fell, peak = run(m, sched, t_up1 + 1.0, watch=(t_up0, t_up1 + 0.5))
+    return {t: max(peak[r.idx[f"{t}_l"]], peak[r.idx[f"{t}_r"]]) for t in TYPES}, fell
+
+
+def rise_speed(m):
     a0 = 0.6
     print("1) LEVANTAR: de A = 0,6 (34°) até em pé, em várias velocidades")
     print("   velocidade A   tempo   pico quadril  pico joelho  pico tornozelo   caiu?")
     for speed in (0.5, 1.0, 2.0, 4.0):
-        t_down, hold = a0 / 0.5, 1.5
-        t_up0 = t_down + hold
-        t_up1 = t_up0 + a0 / speed
-
-        def sched(t):
-            a = ramp(t, 0, t_down, 0, a0) if t < t_up0 else ramp(t, t_up0, t_up1, a0, 0)
-            return r.ctrl({"l": a, "r": a})
-
-        _, fell, peak = run(m, sched, t_up1 + 1.0, watch=(t_up0, t_up1 + 0.5))
-        p = {t: max(peak[r.idx[f"{t}_l"]], peak[r.idx[f"{t}_r"]]) for t in TYPES}
+        p, fell = rise_peak(m, speed, a0)
         print(f"   {speed:4.1f} rad/s   {a0 / speed:4.2f} s   "
               + "   ".join(f"{100 * p[t] / SG90:5.0f}%     " for t in ("hip_pitch", "knee", "ankle_pitch"))
               + f"  {'SIM' if fell else 'não'}")
@@ -109,15 +116,14 @@ def lean_state(m, r: Robot, phi: float, crouch: float, lift: float):
     return d, u
 
 
-def one_leg(m, crouch=0.2, lift=0.4, hold=3.0):
+def one_leg_scan(m, crouch=0.2, lift=0.4, hold=3.0, phis_deg=np.arange(-26, 27, 2)):
+    """Start tilted by each phi over the left foot with the right leg lifted and hold with no
+    feedback. Returns rows (phi_deg, stays_up, right-foot clearance mm, stance-leg peak torques);
+    tilts that put the right foot into the floor are skipped."""
     r = Robot(m)
-    print(f"\n2) UMA PERNA: corpo inclinado de lado sobre o pé esquerdo, pé direito no ar")
-    print(f"   (agachamento A = {crouch}, perna direita encolhida +{lift}; segura {hold:.0f} s sem controle)")
-    print("   inclinação  fica de pé?  pé dir. no ar   apoio (esq.): quadril  joelho  tornozelo  tornoz.roll")
-    stable = []
-    for phi_deg in np.arange(-26, 27, 2):
-        phi = np.radians(phi_deg)
-        d, u = lean_state(m, r, phi, crouch, lift)
+    rows = []
+    for phi_deg in phis_deg:
+        d, u = lean_state(m, r, np.radians(phi_deg), crouch, lift)
         if d.site_xpos[m.site("sole_r").id][2] < 0.002:
             continue                                     # leaning the wrong way: right foot in the floor
         peak = np.zeros(m.nu)
@@ -132,7 +138,16 @@ def one_leg(m, crouch=0.2, lift=0.4, hold=3.0):
                 ok = False
                 break
         clear = d.site_xpos[m.site("sole_r").id][2] * 1000
-        stance = {t: peak[r.idx[f"{t}_l"]] for t in TYPES}
+        rows.append((float(phi_deg), ok, clear, {t: peak[r.idx[f"{t}_l"]] for t in TYPES}))
+    return rows
+
+
+def one_leg(m, crouch=0.2, lift=0.4, hold=3.0):
+    print(f"\n2) UMA PERNA: corpo inclinado de lado sobre o pé esquerdo, pé direito no ar")
+    print(f"   (agachamento A = {crouch}, perna direita encolhida +{lift}; segura {hold:.0f} s sem controle)")
+    print("   inclinação  fica de pé?  pé dir. no ar   apoio (esq.): quadril  joelho  tornozelo  tornoz.roll")
+    stable = []
+    for phi_deg, ok, clear, stance in one_leg_scan(m, crouch, lift, hold):
         if ok:
             stable.append((phi_deg, clear, stance))
             print(f"   {phi_deg:+5.0f}°       SIM        {clear:5.1f} mm             "

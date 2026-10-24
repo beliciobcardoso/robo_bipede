@@ -51,8 +51,8 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [x] Teste de balanço lateral em ritmo de passada (`sim/tools/rocking_test.py`): tornozelo roll 53 % a 0,5 passo/s, 61 % a 1 passo/s — passa até 1 passo/s **(Claude)**
   - [ ] Rever a decisão dos 8 DOF se o tornozelo roll passar de ~70 % do SG90 no ritmo desejado, ou se a inclinação continuar acima de ~20° depois de afinar o quadril (F2) **(juntos)**
 - **F2 — Varredura na GPU**
-  - [ ] Varrer coxa/canela × largura do quadril × agachamento × peso → torque necessário vs SG90 (parado **e** em movimento), **incluindo a massa estimada das capas** **(Claude)**
-  - [ ] Escolher as medidas da perna com base no mapa **(juntos)**
+  - [x] Varrer coxa/canela × largura do quadril × peso das capas → torque vs SG90, parado e em movimento — 360 robôs em `sim/tools/f2_sweep.py` **(Claude)**
+  - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`) **(juntos)**
 - **F3 — Modelo do servo SG90**
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**
   - [ ] Firmware da bancada: degrau de posição, gravar posição e corrente **(juntos)**

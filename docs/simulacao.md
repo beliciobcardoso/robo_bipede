@@ -3,7 +3,7 @@
 Objetivo: testar mecânica e controle no computador **antes** de imprimir e montar, usando a
 RTX 3060 (12 GB) onde ela faz diferença, e evoluir junto com o aprendizado de modelagem e robótica.
 
-> Status: plano **aprovado** (24/10). **F0 e F1 concluídas** — resultados abaixo.
+> Status: plano **aprovado** (24/10). **F0, F1 e F2 concluídas** — resultados abaixo.
 
 ## Resultado da F0 (24/10)
 
@@ -69,7 +69,41 @@ Conclusões:
 - A inclinação necessária depende da **largura do quadril** e da altura do centro de massa:
   quadris mais próximos pedem menos inclinação. Isso entra na varredura da F2.
 
-## 1. Princípio: usar o que existe, medir, só então criar
+## Resultado da F2 (24/10) — varredura de medidas
+
+`sim/tools/f2_sweep.py`: 360 robôs (coxa e canela de 35 a 60 mm, quadris de 40 a 60 mm, capas
+nominais e pesadas) em **12 s** nos 28 núcleos da CPU. Resultados em `sim/results/f2_sweep.csv`
+e `sim/results/f2_sweep.png`.
+
+**Por que CPU e não GPU aqui:** cada combinação é um robô com geometria diferente, simulado
+poucas vezes. A GPU ganha quando é o mesmo robô milhares de vezes (robustez, treino da F7).
+
+**Como o deslocamento de peso foi medido:** o balanço lateral sem controle de equilíbrio
+(`rocking_test.py`) depende demais do padrão de movimento para comparar projetos. Usei a física:
+o tornozelo de apoio precisa girar o robô inteiro sobre o pé, torque ≈ m·g·(distância entre
+quadris ÷ 2) + inércia × aceleração. No robô da F1 a estimativa deu 61 % contra 53 % medidos
+— **conservadora**.
+
+| Quadris | Inclinação numa perna | Deslocar peso a 0,5 passo/s | a 1 passo/s | Passam a 1 passo/s |
+|---------|----------------------|-----------------------------|-------------|--------------------|
+| 40 mm | 10–16° | 44–45 % | 57–63 % | 36 de 36 |
+| **45 mm** | **12–16°** | **49–51 %** | **63–70 %** | **34 de 36** |
+| 50 mm | 14–18° | 54–57 % | 71–80 % | 0 de 36 |
+| 55 mm (F1) | 14–20° | 60–62 % | 78–86 % | 0 de 36 |
+| 60 mm | 16–22° | 66–68 % | 86–95 % | 0 de 36 |
+
+Conclusões:
+- **A largura do quadril decide.** O esforço para deslocar o peso cresce em linha reta com ela;
+  o comprimento das pernas quase não muda.
+- **Pernas mais longas pedem menos inclinação** (centro de massa mais alto em relação aos pés),
+  mas aumentam o esforço do joelho ao levantar (coxa 40 mm: 51 %; coxa 50 mm: 55 %).
+- **As capas pesam na conta:** com capas pesadas (100 g em vez de 50 g, 409 g no total) nenhuma
+  combinação a 45 mm passa a 1 passo/s (74–77 %); todas continuam passando a 0,5 passo/s.
+- **Medidas aprovadas (24/10):** quadris 45 mm, coxa = canela = 45 mm, pé 40 × 70 mm, capas
+  com meta de 35 g e limite de 50 g. O modelo `f1_biped.xml` passou a usá-las: inclinação numa
+  perna 14°, balanço lateral com tornozelo roll a 45 % (0,5 passo/s) e 50 % (1 passo/s).
+
+ usar o que existe, medir, só então criar
 
 1. Começa com ferramenta aberta e consolidada.
 2. Mede contra o robô real (ou contra uma conta conhecida).

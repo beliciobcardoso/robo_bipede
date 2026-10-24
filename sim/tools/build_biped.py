@@ -33,12 +33,12 @@ JOINT_STOPS = {
 
 @dataclass(frozen=True)
 class BipedParams:
-    # Lengths between joint axes (mm)
+    # Lengths between joint axes (mm) — thigh = shin = 45, approved after F2 (docs/arquitetura_perna.md)
     thigh_mm: float = 45.0          # hip pitch -> knee
     shin_mm: float = 45.0           # knee -> ankle pitch
     ankle_link_mm: float = 12.0     # ankle pitch -> ankle roll
     roll_to_sole_mm: float = 14.0   # ankle roll axis -> bottom of the sole
-    hip_half_width_mm: float = 27.5  # torso centre -> each hip (55 mm between legs)
+    hip_half_width_mm: float = 22.5  # torso centre -> each hip (45 mm between legs, approved after F2)
     hip_drop_mm: float = 10.0       # torso bottom -> hip pitch axis
 
     # Torso box (mm) and what it carries (g)
@@ -53,8 +53,8 @@ class BipedParams:
     shin_struct_g: float = 10.0
     ankle_struct_g: float = 6.0
     foot_struct_g: float = 15.0
-    leg_cover_g: float = 15.0       # split over thigh / shin / foot
-    foot_size_mm: tuple = (70.0, 45.0, 6.0)
+    leg_cover_g: float = 15.0       # split over thigh / shin / foot; covers 50 g total = validated limit
+    foot_size_mm: tuple = (70.0, 40.0, 6.0)   # 40 wide = hip spacing - 5 mm, feet never touch
 
     # Servo model (SG90-like position servo; to be calibrated in F3)
     stall_torque_nm: float = 0.18

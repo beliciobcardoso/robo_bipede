@@ -36,10 +36,10 @@
     <body name="torso" pos="0 0 0.14950">
       <freejoint/>
       <geom name="torso" type="box" size="0.02500 0.03500 0.02250" mass="0.17500" material="torso" class="contact"/>
-      <geom name="servo_hip_pitch_l" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 0.02750 -0.01100" mass="0.00900" material="servo" class="visual"/>
-      <geom name="servo_hip_pitch_r" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 -0.02750 -0.01100" mass="0.00900" material="servo" class="visual"/>
+      <geom name="servo_hip_pitch_l" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 0.02250 -0.01100" mass="0.00900" material="servo" class="visual"/>
+      <geom name="servo_hip_pitch_r" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 -0.02250 -0.01100" mass="0.00900" material="servo" class="visual"/>
       <site name="imu" pos="0 0 0" size="0.004"/>
-      <body name="thigh_l" pos="0.00000 0.02750 -0.03250">
+      <body name="thigh_l" pos="0.00000 0.02250 -0.03250">
         <joint name="hip_pitch_l" class="hip_pitch"/>
         <geom name="thigh_l" type="box" size="0.00700 0.00900 0.02250" pos="0.00000 0.00000 -0.02250" mass="0.01500" material="link" class="visual"/>
         <geom name="servo_knee_l" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 0.00000 -0.03750" mass="0.00900" material="servo" class="visual"/>
@@ -52,13 +52,13 @@
             <geom name="ankle_l" type="box" size="0.01000 0.00800 0.00600" pos="0.00000 0.00000 -0.00600" mass="0.01500" material="servo" class="visual"/>
             <body name="foot_l" pos="0.00000 0.00000 -0.01200">
               <joint name="ankle_roll_l" class="ankle_roll"/>
-              <geom name="foot_l" type="box" size="0.03500 0.02250 0.00300" pos="0.00000 0.00000 -0.01100" mass="0.02000" material="link" class="contact"/>
+              <geom name="foot_l" type="box" size="0.03500 0.02000 0.00300" pos="0.00000 0.00000 -0.01100" mass="0.02000" material="link" class="contact"/>
               <site name="sole_l" pos="0.00000 0.00000 -0.01400" size="0.002"/>
             </body>
           </body>
         </body>
       </body>
-      <body name="thigh_r" pos="0.00000 -0.02750 -0.03250">
+      <body name="thigh_r" pos="0.00000 -0.02250 -0.03250">
         <joint name="hip_pitch_r" class="hip_pitch"/>
         <geom name="thigh_r" type="box" size="0.00700 0.00900 0.02250" pos="0.00000 0.00000 -0.02250" mass="0.01500" material="link" class="visual"/>
         <geom name="servo_knee_r" type="box" size="0.00610 0.01180 0.01150" pos="0.00000 0.00000 -0.03750" mass="0.00900" material="servo" class="visual"/>
@@ -71,7 +71,7 @@
             <geom name="ankle_r" type="box" size="0.01000 0.00800 0.00600" pos="0.00000 0.00000 -0.00600" mass="0.01500" material="servo" class="visual"/>
             <body name="foot_r" pos="0.00000 0.00000 -0.01200">
               <joint name="ankle_roll_r" class="ankle_roll"/>
-              <geom name="foot_r" type="box" size="0.03500 0.02250 0.00300" pos="0.00000 0.00000 -0.01100" mass="0.02000" material="link" class="contact"/>
+              <geom name="foot_r" type="box" size="0.03500 0.02000 0.00300" pos="0.00000 0.00000 -0.01100" mass="0.02000" material="link" class="contact"/>
               <site name="sole_r" pos="0.00000 0.00000 -0.01400" size="0.002"/>
             </body>
           </body>
