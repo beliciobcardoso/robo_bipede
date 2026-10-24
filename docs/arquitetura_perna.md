@@ -73,33 +73,37 @@ Condições para manter a decisão:
 Se 1 ou 2 falhar, a decisão volta para discussão.
 
 **Situação (24/10):**
-- Condição 1 — **passa.** Com as medidas aprovadas: tornozelo roll 45 % a 0,5 passo/s e 50 % a 1 passo/s. Antes, com quadris a 55 mm, dava apertado: Balanço lateral sem controle: tornozelo
+- Condição 1 — **passa.** Com as medidas atuais (quadris 50 mm): tornozelo roll 50 % a 0,5 passo/s e 57 % a 1 passo/s. Antes, com quadris a 55 mm, dava apertado: Balanço lateral sem controle: tornozelo
   roll 53 % a 0,5 passo/s e 61 % a 1 passo/s; passa de 70 % só acima disso (85 % a 1,33 passo/s).
   O joelho chega a 69 % a 1 passo/s. Números preliminares: dependem do amortecimento do servo
   (estimado; a F3 mede) e do padrão de movimento (a F5 refina).
-- Condição 2 — **passa.** Com quadris a 45 mm a inclinação para apoiar numa perna fica entre 12° e 16° (F2).
+- Condição 2 — **passa.** Inclinação para apoiar numa perna: 14° (quadris 50 mm, tornozelo 22 mm).
 - Condição 3 — entra no projeto do quadril.
 
 ## Medidas da perna
 
-> **Aprovadas em 24/10** (proposta da F2). O modelo de simulação `sim/models/f1_biped.xml` já usa estas medidas.
+> **Aprovadas em 24/10.** Revisadas no mesmo dia no conceito do suporte (`suporte_servo.md`):
+> a perna real tem ~42 mm de largura (pilha horn + servo + rolamento ao longo do eixo), então os
+> quadris foram de 45 para **50 mm**, e o tornozelo pitch→roll de 12 para **22 mm**. O modelo
+> `sim/models/f1_biped.xml` usa estas medidas.
 
 | Medida | Valor | Por quê |
-|--------|----------------|---------|
-| Distância entre quadris | **45 mm** | Passa a 1 passo/s (deslocar peso 66 %, inclinação 14°). 40 mm seria melhor no torque, mas deixa só ~4 mm entre os conjuntos dos quadris (servo + suporte + rolamento ~36 mm de largura cada), sem espaço para as capas |
-| Coxa (quadril → joelho) | **45 mm** | Cabe o servo do joelho (23,6 mm) + suporte + encaixes da capa; joelho a 53 % ao levantar |
-| Canela (joelho → tornozelo) | **45 mm** | Idem para o servo do tornozelo; coxa = canela simplifica a cinemática inversa (F5) |
-| Largura do pé | **40 mm** | Quadris − 5 mm, para os pés não se tocarem |
-| Comprimento do pé | 70 mm | Mantido |
-| Massa das capas | **meta 35 g, limite 50 g no total** | Validado a 1 passo/s com 50 g (tronco 20 g + 15 g por perna). Com 100 g o robô perde o ritmo de 1 passo/s |
+|--------|-------|---------|
+| Distância entre quadris | **50 mm** | Perna de ~42 mm + ~8 mm de folga: cabe capa nas duas faces. A 45 mm sobrariam ~3 mm |
+| Largura da perna (estrutura) | ~42 mm | Pilha ao longo do eixo pitch: braço do garfo, horn, servo, fundo do suporte, rolamento |
+| Coxa (quadril → joelho) | **45 mm** | Cabe suporte (~24 mm do eixo às costas) + garfo (~14 mm do eixo à base) + junção |
+| Canela (joelho → tornozelo) | **45 mm** | Idem; coxa = canela simplifica a cinemática inversa (F5) |
+| Tornozelo pitch → roll | **22 mm** | Garfo do tornozelo pitch + suporte do servo roll, numa peça única |
+| Pé | **45 × 70 mm** | Largura = quadris − 5 mm, para os pés não se tocarem |
+| Massa das capas | **meta 35 g, limite 50 g no total** | Validado a 1 passo/s com 50 g (tronco 20 g + 15 g por perna) |
 
-Altura do centro do tronco em pé: ~148 mm. Massa total estimada: 359 g.
+Altura do centro do tronco em pé: ~158 mm. Massa total estimada: 359 g.
 
-Robô aprovado na simulação (aberto, sem controle de equilíbrio):
+Robô atual na simulação (aberto, sem controle de equilíbrio):
 
 | Teste | Resultado |
 |-------|-----------|
-| Ficar numa perna | inclinação de **14°** (faixa estável 8–20°); joelho 11 %, tornozelo roll até 33 % |
-| Balanço lateral a 0,5 passo/s | tornozelo roll **45 %**, joelho 36 % |
-| Balanço lateral a 1 passo/s | tornozelo roll **50 %**, joelho 68 % |
+| Ficar numa perna | inclinação de **14°** (faixa estável 8–20°); joelho 11 %, tornozelo roll até 40 % nas bordas |
+| Balanço lateral a 0,5 passo/s | tornozelo roll **50 %**, joelho 36 % |
+| Balanço lateral a 1 passo/s | tornozelo roll **57 %**, joelho 69 % |
 | Levantar de 34° em 0,6 s | joelho 53 % |
