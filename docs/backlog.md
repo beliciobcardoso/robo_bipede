@@ -18,7 +18,8 @@ Documentos de apoio: [materiais](lista_materiais.md) · [medidas do servo](medid
 - [x] Servo modelado à mão no PartDesign (`cad/manual/servo_sg90.FCStd`) **(você)**
 - [x] Modelo de referência do rolamento 623ZZ (`cad/parts/bearing_623zz.py`) **(Claude)**
 - [x] Comparador de modelos na GPU (`tools/compare_meshes.py`) **(Claude)**
-- [x] Plano de simulação escrito (`docs/simulacao.md`) **(Claude)**
+- [x] Plano de simulação escrito e aprovado (`docs/simulacao.md`) **(juntos)**
+- [x] F0 — ambiente de simulação na RTX 3060 (MuJoCo + MJX/Warp), teste de fumaça passando **(Claude)**
 
 ## 1. Compras
 
@@ -37,15 +38,14 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 
 Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o projeto mecânico pede.
 
-- [ ] Aprovar o plano de simulação **(você)**
 - **F0 — Ambiente**
-  - [ ] Instalar MuJoCo + JAX com CUDA no `.venv` **(Claude)**
-  - [ ] Teste de fumaça: simulação rodando na RTX 3060 **(Claude)**
+  - [x] Instalar MuJoCo + JAX com CUDA no `.venv` (versões fixadas em `requirements.txt`) **(Claude)**
+  - [x] Teste de fumaça na RTX 3060: motor Warp, ~4,7 milhões de passos/s, igual à CPU **(Claude)**
 - **F1 — Uma perna de caixinhas**
   - [ ] Modelo MuJoCo de 1 perna (4 juntas) com blocos e massas estimadas **(Claude)**
   - [ ] Abrir no visualizador, mexer as juntas e ler os torques **(você)**
 - **F2 — Varredura na GPU**
-  - [ ] Varrer coxa/canela × agachamento × peso → torque necessário vs SG90 **(Claude)**
+  - [ ] Varrer coxa/canela × agachamento × peso → torque necessário vs SG90, **incluindo a massa estimada das capas** **(Claude)**
   - [ ] Escolher as medidas da perna com base no mapa **(juntos)**
 - **F3 — Modelo do servo SG90**
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**
@@ -74,25 +74,46 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
 Peças estruturais são desenhadas por você no FreeCAD, com tutorial e revisão do Claude.
 Peças compradas têm modelo de referência por script.
 
-- [ ] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2 **(juntos)**
+**Regra de projeto:** o esqueleto inteiro já nasce com os **pontos de encaixe das capas**
+(seção 3.1). Cada peça estrutural abaixo só está pronta quando tiver os encaixes dela.
+
+- [ ] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2, **com o espaço reservado para as capas em volta de cada segmento** **(juntos)**
+- [ ] Padrão de encaixe das capas — definir **antes** do suporte (ver 3.1) **(juntos)**
 - [ ] Tutorial do suporte do servo + rolamento **(Claude)**
-- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas **(você)**
-- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento **(Claude)**
-- [ ] Coxa (quadril → joelho) **(você)**
-- [ ] Canela (joelho → tornozelo) **(você)**
-- [ ] Bloco do tornozelo: pitch + roll cruzados **(você)**
-- [ ] Pé com sola **(você)**
-- [ ] Quadril/tronco: ESP32, bateria, MPU-6050 no centro, placa de distribuição **(você)**
-- [ ] Montagem virtual: checar colisões e amplitude de cada junta **(juntos)**
+- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa** **(você)**
+- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **encaixes da capa** **(Claude)**
+- [ ] Coxa (quadril → joelho), com encaixes da capa e caminho dos fios **(você)**
+- [ ] Canela (joelho → tornozelo), com encaixes da capa e caminho dos fios **(você)**
+- [ ] Bloco do tornozelo: pitch + roll cruzados, com encaixes da capa **(você)**
+- [ ] Pé com sola, com encaixes da capa **(você)**
+- [ ] Quadril/tronco: ESP32, bateria, MPU-6050 no centro, placa de distribuição, **com encaixes da capa e acesso de manutenção** **(você)**
+- [ ] Montagem virtual: checar colisões e amplitude de cada junta — **com as capas montadas** **(juntos)**
 - [ ] Modelos de referência que faltam: parafusos/porcas M3, ESP32 DevKit, MPU-6050, bateria **(Claude)**
+
+### 3.1 Capas encaixadas (proteção e acabamento)
+
+Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, presas por
+**encaixe** (sem cola). O esqueleto é projetado para recebê-las desde o início.
+
+- [ ] Definir o tipo de encaixe: clipe de pressão (snap-fit em balanço), trava em trilho ou ímã — com prós e contras **(juntos)**
+- [ ] Definir o padrão: dimensões do clipe e do rebaixo, folga, espessura da parede da capa, quantos encaixes por capa **(juntos)**
+- [ ] Modelo de referência do encaixe padrão, para todas as peças usarem o mesmo **(Claude)**
+- [ ] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)**
+- [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga da bateria, troca de servo, calibração **(juntos)**
+- [ ] Caminho dos fios por dentro das capas sem prender as juntas em nenhuma posição **(juntos)**
+- [ ] Ventilação: saída de ar para o regulador buck e os servos **(juntos)**
+- [ ] Capas da perna: coxa, canela, tornozelo e pé **(você)**
+- [ ] Capa do quadril/tronco, com as aberturas de acesso **(você)**
+- [ ] Revisão: capas não limitam a amplitude das juntas nem encostam umas nas outras **(Claude)**
 
 ## 4. Impressão e montagem
 
-- [ ] Peça de teste de tolerância: bolso do servo, alojamento do rolamento, furos M2/M3 **(juntos)**
+- [ ] Peça de teste de tolerância: bolso do servo, alojamento do rolamento, furos M2/M3 **e o encaixe padrão da capa** (encaixar e soltar várias vezes) **(juntos)**
 - [ ] Ajustar folgas no CAD conforme o teste **(você)**
 - [ ] Imprimir uma perna completa e montar **(você)**
 - [ ] Testar a perna presa na bancada antes da segunda **(juntos)**
 - [ ] Imprimir e montar o robô completo **(você)**
+- [ ] Imprimir e montar as capas; conferir massa final na balança **(você)**
 
 ## 5. Eletrônica
 
