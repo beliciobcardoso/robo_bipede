@@ -1,0 +1,11 @@
+# Analysis + simulation environment (Python 3.14, NVIDIA driver with CUDA 12.x support).
+#   uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
+# Versions pinned: JAX / CUDA / Warp combinations break easily across upgrades.
+numpy==2.5.4
+matplotlib==3.11.2
+cupy-cuda12x[ctk]==14.2.0
+jax[cuda12]==0.12.0.1
+mujoco==3.17.0
+mujoco-mjx==3.17.0
+mujoco-warp==3.17.0
+warp-lang==1.18.0

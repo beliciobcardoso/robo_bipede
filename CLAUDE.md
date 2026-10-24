@@ -29,7 +29,19 @@ flatpak run org.freecad.FreeCAD cad/build/servo_sg90.FCStd   # open in GUI
 
 Override the FreeCAD binary with `make FREECAD_CMD=...`. No tests or linter yet.
 
-Comparing two models (e.g. a hand-made part vs its scripted reference) — GPU volumetric diff, RTX 3060 via CuPy in `.venv` (`uv venv .venv && uv pip install --python .venv/bin/python numpy matplotlib "cupy-cuda12x[ctk]"`):
+Python environment (analysis + simulation, pinned): `uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt`.
+
+```bash
+.venv/bin/python sim/tools/smoke_test.py   # MuJoCo CPU vs MJX GPU (JAX and Warp backends); must print SMOKE TEST PASSED
+```
+
+Simulation gotchas (measured on this machine, F0):
+- Use MJX with `impl="warp"` and `graph_mode=JaxCallableGraphMode.WARP` (from `warp._src.jax.ffi`). The default graph mode fails with `CUDA_ERROR_NOT_SUPPORTED` (nested CUDA graphs); WARP mode is also the fastest (~4.7 M steps/s at 16k robots vs ~0.2 M for `impl="jax"` and ~70 k for one CPU core).
+- Warp preallocates for the whole batch: pass `naconmax` (≈ contacts per robot × batch) and `njmax` to `mjx.make_data`.
+- Set `XLA_PYTHON_CLIENT_PREALLOCATE=false` before importing JAX, or it grabs 75 % of the 12 GB VRAM.
+- MuJoCo units are SI (m, kg, s, N·m); CAD is in mm — convert at the bridge.
+
+Comparing two models (e.g. a hand-made part vs its scripted reference) — GPU volumetric diff via CuPy:
 
 ```bash
 flatpak run --env=SRC=$PWD/cad/manual/servo_sg90.FCStd --env=OBJ=Body --env=OUT=$PWD/cad/build/a.stl \

@@ -3,7 +3,31 @@
 Objetivo: testar mecânica e controle no computador **antes** de imprimir e montar, usando a
 RTX 3060 (12 GB) onde ela faz diferença, e evoluir junto com o aprendizado de modelagem e robótica.
 
-> Status: **proposta** — nenhuma fase implementada ainda.
+> Status: plano **aprovado** (24/10). **F0 concluída** — resultados abaixo.
+
+## Resultado da F0 (24/10)
+
+Teste: `sim/tools/smoke_test.py` com `sim/models/f0_smoke.xml` (tronco + 1 perna de 4 juntas de
+caixinhas agachando), 1 s simulado = 500 passos.
+
+| Onde | Robôs em paralelo | Passos/s | × CPU | Resultado igual à CPU? |
+|------|------------------:|---------:|------:|------------------------|
+| CPU (1 núcleo) | 1 | ~66 mil | 1 | — |
+| GPU, motor JAX | 4 096 | ~196 mil | 3,0 | sim (0,04 mm) |
+| GPU, motor JAX | 16 384 | ~207 mil | 3,1 | sim (0,04 mm) |
+| GPU, motor **Warp** | 4 096 | ~3,7 milhões | 56 | sim (0,000 mm) |
+| GPU, motor **Warp** | 16 384 | **~4,7 milhões** | **71** | sim (0,000 mm) |
+
+Compilação: motor JAX 13–52 s por tamanho de lote; motor Warp 1–3 s.
+
+Conclusões:
+- **Usar o motor Warp** do MJX (NVIDIA) no modo de captura `WARP`. O modo padrão falha nesta
+  combinação driver/CUDA, e o Warp é ~19–23× mais rápido que o motor JAX e compila em segundos.
+- A GPU só compensa com **muitos robôs em paralelo**: com 1 robô a CPU é muito mais rápida.
+  Para ver e depurar um robô, CPU; para varreduras e treino, GPU.
+- Sanidade física: agachado sobre uma perna, o joelho pede 0,043 N·m (24 % do SG90) neste
+  modelo de caixinhas — número a ser refeito com massas reais na F1/F2.
+- Versões fixadas em `requirements.txt`.
 
 ## 1. Princípio: usar o que existe, medir, só então criar
 
@@ -23,7 +47,7 @@ O que vale a pena ser nosso é o que ninguém tem pronto para este robô.
 | Ferramenta | Para quê | CPU/GPU |
 |------------|----------|---------|
 | **MuJoCo** | Motor de física padrão em robôs com pernas. Visualizador para ver e mexer no robô. | CPU (rápido) |
-| **MJX** (MuJoCo em JAX) | Mesma física, rodando **milhares de robôs em paralelo** na placa de vídeo. | **GPU** |
+| **MJX** (MuJoCo em JAX) | Mesma física, rodando **milhares de robôs em paralelo** na placa de vídeo. Motor **Warp** (NVIDIA) — escolhido na F0. | **GPU** |
 | **MuJoCo Playground / Brax** | Treino de andar por aprendizado por reforço (PPO) em cima do MJX. | **GPU** |
 | **CuPy** | Cálculos próprios na GPU (já usado em `tools/compare_meshes.py`). | **GPU** |
 | **Isaac Lab** (NVIDIA) | Alternativa mais pesada. Fica para depois, só se o MJX não der conta. | GPU |
