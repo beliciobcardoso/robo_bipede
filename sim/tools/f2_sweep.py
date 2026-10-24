@@ -49,6 +49,7 @@ ROLL_SOFT_LIMIT_DEG = 25.0      # ankle roll software limit
 STANCE_CROUCH = 0.2             # same stance crouch as the one-leg test
 G = 9.81
 FOOT_GAP_MM = 5.0              # free space between the two feet
+FOOT_MAX_WIDTH_MM = 45.0       # widest foot tried (narrower when the hips are close)
 COVERS = {"nominais": (20.0, 15.0), "pesadas": (40.0, 30.0)}   # (torso, per leg) g
 PACES = {"05": 4.0, "10": 2.0}  # step rate label -> cycle period (s)
 
@@ -86,7 +87,7 @@ def evaluate(point: tuple) -> dict:
     torso_cover, leg_cover = COVERS[covers]
     base = BipedParams()
     fx, fy, fz = base.foot_size_mm
-    foot_w = min(fy, spacing - FOOT_GAP_MM)              # feet must not touch each other
+    foot_w = min(FOOT_MAX_WIDTH_MM, spacing - FOOT_GAP_MM)   # feet must not touch each other
     p = replace(base, thigh_mm=thigh, shin_mm=shin, hip_half_width_mm=spacing / 2,
                 torso_cover_g=torso_cover, leg_cover_g=leg_cover, foot_size_mm=(fx, foot_w, fz))
     m = mujoco.MjModel.from_xml_string(build_xml(p))
@@ -136,7 +137,7 @@ def run_grid(grid: dict) -> list[dict]:
 def save_csv(rows: list[dict], path: Path):
     keys = list(dict.fromkeys(k for r in rows for k in r))
     with open(path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=keys)
+        w = csv.DictWriter(f, fieldnames=keys, lineterminator="\n")
         w.writeheader()
         for r in rows:
             w.writerow({k: (f"{v:.1f}" if isinstance(v, float) else v) for k, v in r.items()})
