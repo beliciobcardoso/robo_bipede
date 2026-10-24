@@ -115,38 +115,73 @@ Os valores estão em **radianos**: o controle vai de −1,57 a +1,57 (−90° a 
 Com a perna esticada, deve ficar perto de **0** — o peso passa reto pelos ossos, o motor
 quase não trabalha.
 
-## Passo 5 — Experimento: agachar
+## Passo 5 — Experimento: agachar (com o monitor)
+
+Arrastar os controles até um número exato é difícil. Para este experimento use o **monitor**:
+o mesmo visualizador, mas com teclas que põem as juntas na posição exata, o torque mostrado no
+terminal e **tudo gravado num arquivo** que eu consigo ler e analisar depois.
 
 Para agachar sem cair, as três juntas de frente/trás se mexem **juntas**, numa regra simples:
 
 > **quadril = A · joelho = −2 × A · tornozelo = A**
 
 Isso dobra o joelho e mantém o tronco em cima do pé (como você agacha: joelho para frente,
-quadril e tornozelo compensam).
+quadril e tornozelo compensam). O monitor aplica essa regra sozinho; você só escolhe o **A**.
 
-1. **Backspace** para recomeçar.
-2. No **Control**, ponha os três valores de uma linha da tabela (clique no controle e arraste;
-   olhe o número ao lado).
-3. Espere 2–3 segundos e anote o torque do joelho no **Watch**.
+1. Feche o visualizador que estiver aberto e rode:
 
-| A | quadril (hip_pitch) | joelho (knee) | tornozelo (ankle_pitch) | Torque do joelho esperado | Seu valor |
-|---|---|---|---|---|---|
-| 0 | 0 | 0 | 0 | ~0,00 N·m | |
-| 0,2 (≈ 11°) | 0,2 | −0,4 | 0,2 | ~0,02 N·m | |
-| 0,4 (≈ 23°) | 0,4 | −0,8 | 0,4 | ~0,04 N·m (≈ 23 % do SG90) | |
-| 0,6 (≈ 34°) | 0,6 | −1,2 | 0,6 | **o robô cai** | |
+   ```bash
+   .venv/bin/python sim/tools/monitor.py
+   ```
 
-O valor esperado eu calculei rodando a mesma simulação. Pequenas diferenças são normais — mexer
-os controles com o mouse não é exato.
+2. Abre a mesma janela. **Clique uma vez dentro da área 3D** — assim as teclas vão para ela.
+3. Use as teclas:
+
+   | Tecla | O que faz |
+   |-------|-----------|
+   | **1** / **2** / **3** / **4** | A = 0 / 0,2 / 0,4 / 0,6 rad |
+   | **+** ou **=** | Agacha mais 0,05 rad |
+   | **−** | Agacha menos 0,05 rad |
+   | **Backspace** | Recomeça com a perna esticada |
+
+   O robô vai até a posição **devagar**, na velocidade de um servo, e não num salto.
+4. Olhe o **terminal**: uma linha se atualiza sozinha, assim:
+
+   ```
+   t= 12.4s | auto | A=0.40 rad ( 23°) | joelho 0.041 N·m =  23% do SG90 | inclinação  1.6° | tronco 136.2 mm
+   ```
+
+   Espere o número do joelho parar de mudar (1–2 segundos) e anote na tabela.
+5. Quando terminar, feche a janela. O terminal mostra onde ficou a gravação, algo como
+   `log salvo: sim/logs/monitor_20261024_154454.csv`. **Me avise que eu analiso o arquivo.**
+
+| A | Graus | Torque do joelho esperado | % do SG90 | Seu valor |
+|---|-------|---------------------------|-----------|-----------|
+| 0 (tecla 1) | 0° | 0,000 N·m | 0 % | |
+| 0,2 (tecla 2) | 11° | 0,021 N·m | 12 % | |
+| 0,4 (tecla 3) | 23° | 0,041 N·m | 23 % | |
+| 0,6 (tecla 4) | 34° | 0,059 N·m | 33 % | |
+| 0,7 (tecla 4 + duas vezes **+**) | 40° | 0,067 N·m | 37 % | |
+| mais **+** | 40° | não passa disso: aparece **limite de software: ankle_pitch** | — | |
+
+Valores calculados rodando a mesma simulação (`sim/tools/monitor.py --sweep`).
 
 ### O que o experimento ensina
 
 - **Quanto mais agacha, mais o joelho trabalha.** O peso do tronco fica mais longe do eixo do
   joelho (a alavanca aumenta), então o motor precisa fazer mais torque.
-- **Por que ele cai em 0,6**: em pé numa perna só, com um pé pequeno, qualquer desequilíbrio
-  derruba. Agachando mais, o motor do joelho cede um pouco (ele é fraco, como o SG90), o tronco
-  sai de cima do pé e o robô tomba. Isso é exatamente o que o **equilíbrio com o MPU-6050** vai
-  corrigir mais adiante.
+- **Quem limita o agachamento é o limite de software, não a força.** Cada junta tem um
+  **batente** (o ponto onde a peça impressa encosta e para) e um **limite de software** 5° antes
+  dele. O motor nunca é mandado além do limite de software, então nunca empurra o batente.
+  Aqui o primeiro a chegar no limite é o **tornozelo** (40°), com o joelho ainda a 37 % da força.
+- **Por que dois limites:** o batente protege o servo em quedas e empurrões — o impacto vai para
+  a peça impressa, não para a engrenagem plástica. O limite de software impede o motor de forçar
+  contra o batente, o que faria o SG90 puxar muita corrente e esquentar. Se aparecer
+  **NO BATENTE** no terminal, foi um impacto (queda, empurrão), não o motor.
+- **Movimento rápido derruba.** Se você arrastar os controles do painel **Control** depressa
+  (o monitor passa para o modo *manual* quando você mexe neles), o tranco tira o tronco de cima
+  do pé e o robô pode cair — mesmo numa posição em que, chegando devagar, ele fica de pé. (Saltar direto de 0 para A = 0,6 derruba; chegar devagar, não.) Isso é
+  **dinâmica**: não importa só onde o robô está, mas como ele chegou lá.
 - O robô de verdade terá **duas pernas** e massas reais — os números da F1 serão outros.
 
 ## Passo 6 (opcional) — Ver as forças no chão
@@ -169,6 +204,7 @@ Painel da esquerda → **Rendering** → ligue **Contact Point** e **Contact For
 |----------|-------------|
 | A área 3D está vazia/cinza | Feche e abra de novo; se continuar, me mande um print |
 | Mexi no controle e nada aconteceu | A simulação está pausada: aperte **Espaço** (o botão **Run** fica verde) |
+| No monitor, as teclas 1–4 não fazem nada | Clique uma vez dentro da área 3D antes de apertar |
 | O robô caiu e não levanta | Normal — ele não sabe levantar. **Backspace** |
 | Não acho o campo do **Watch** | Clique na barra **Watch** para abrir a seção |
 | O terminal não responde | Ele está esperando a janela fechar. Feche a janela do MuJoCo |
