@@ -4,7 +4,7 @@ Acompanhamento do robô bípede. Marque `[x]` ao concluir. Cada item diz **quem*
 **(você)**, **(Claude)** ou **(juntos)**. Itens dentro de uma seção estão na ordem sugerida.
 
 Documentos de apoio: [materiais](lista_materiais.md) · [medidas do servo](medidas_servo_sg90.md) ·
-[tutorial PartDesign](tutorial_servo_partdesign.md) · [plano de simulação](simulacao.md)
+[tutorial PartDesign](tutorial_servo_partdesign.md) · [tutorial MuJoCo](tutorial_mujoco.md) · [plano de simulação](simulacao.md)
 
 ---
 
@@ -42,6 +42,7 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
 - **F0 — Ambiente**
   - [x] Instalar MuJoCo + JAX com CUDA no `.venv` — versões fixadas em `requirements.txt` **(Claude)**
   - [x] Teste de fumaça: simulação rodando na RTX 3060 — `sim/tools/smoke_test.py`, motor Warp 4,7 M passos/s **(Claude)**
+  - [ ] Fazer o [tutorial do MuJoCo](tutorial_mujoco.md): abrir, mexer as juntas, ler o torque, experimento de agachar **(você)**
 - **F1 — Uma perna de caixinhas**
   - [ ] Modelo MuJoCo de 1 perna (4 juntas) com blocos e massas estimadas **(Claude)**
   - [ ] Abrir no visualizador, mexer as juntas e ler os torques **(você)**
