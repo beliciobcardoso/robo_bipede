@@ -1,7 +1,11 @@
 """Viewer + recorder for the leg models: exact postures by key, live torque, CSV log.
 
-    .venv/bin/python sim/tools/monitor.py                 # open the viewer and record
+    .venv/bin/python sim/tools/monitor.py                 # F0 model (one leg), viewer + recording
+    .venv/bin/python sim/tools/monitor.py --model f1      # F1 model (whole biped)
     .venv/bin/python sim/tools/monitor.py --sweep         # no window: find the deepest crouch
+
+Works with any model whose actuators are named <joint type> or <joint type>_<l|r>, joint types
+hip_pitch, knee, ankle_pitch, ankle_roll. Both legs follow the same crouch.
 
 Crouch rule (keeps the torso over the foot): hip = A, knee = -2A, ankle pitch = A.
 Keys in the viewer window:
@@ -23,6 +27,7 @@ import argparse
 import csv
 import datetime as dt
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -31,7 +36,7 @@ import mujoco
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = ROOT / "models" / "f0_smoke.xml"
+MODELS = {"f0": ROOT / "models" / "f0_smoke.xml", "f1": ROOT / "models" / "f1_biped.xml"}
 LOG_DIR = Path(os.environ.get("MONITOR_LOG_DIR", ROOT / "logs"))  # override for test runs
 
 SG90_TORQUE = 0.18          # N·m, stall torque of the SG90 (also the model's forcerange)
@@ -47,23 +52,39 @@ LIMIT_MARGIN = 0.01          # rad from the joint range counts as "on the stop"
 SOFT_MARGIN = 1e-3           # rad from the ctrlrange counts as "at the software limit"
 
 
-def crouch_targets(a: float) -> np.ndarray:
-    return np.array([a, -2.0 * a, a, 0.0])
+# Crouch rule: target of each joint type = coefficient × A
+CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0}
+
+
+def joint_type(actuator_name: str) -> str:
+    return actuator_name.removesuffix("_l").removesuffix("_r")
 
 
 class Leg:
-    """Reads the quantities we care about from the model state."""
+    """Reads the quantities we care about from the model state (one or two legs)."""
 
     def __init__(self, m: mujoco.MjModel):
         self.m = m
         self.names = [m.actuator(i).name for i in range(m.nu)]
+        self.types = [joint_type(n) for n in self.names]
+        self.coef = np.array([CROUCH[t] for t in self.types])
         self.qadr = [m.jnt_qposadr[m.actuator_trnid[i, 0]] for i in range(m.nu)]
         self.ranges = [m.jnt_range[m.actuator_trnid[i, 0]] for i in range(m.nu)]
         self.torso = m.body("torso").id
         self.soft = [m.actuator_ctrlrange[i] for i in range(m.nu)]
-        hip, knee, ankle = self.soft[0], self.soft[1], self.soft[2]
-        # deepest crouch that keeps hip = A, knee = -2A, ankle = A inside every software limit
-        self.a_max = float(min(hip[1], -knee[0] / 2.0, ankle[1]))
+        # deepest crouch that keeps every joint's coefficient × A inside its software limit
+        bounds = [(r[1] / c if c > 0 else r[0] / c) for c, r in zip(self.coef, self.soft) if c != 0]
+        self.a_max = float(min(bounds))
+
+    def ctrl_for(self, a: float) -> np.ndarray:
+        return self.coef * a
+
+    def knee_torque(self, d) -> float:
+        return max(abs(float(d.actuator_force[i])) for i, t in enumerate(self.types) if t == "knee")
+
+    def worst_joint(self, d) -> tuple[str, float]:
+        i = int(np.argmax(np.abs(d.actuator_force)))
+        return self.names[i], abs(float(d.actuator_force[i]))
 
     def angles(self, d) -> np.ndarray:
         return np.array([d.qpos[a] for a in self.qadr])
@@ -117,19 +138,22 @@ class Recorder:
 
 
 def status_line(leg: Leg, d, mode: str, a: float) -> str:
-    knee = abs(float(d.actuator_force[1]))
+    knee = leg.knee_torque(d)
+    worst, worst_t = leg.worst_joint(d)
     stops = [n for n, s in zip(leg.names, leg.on_stop(d)) if s]
-    parts = [f"t={d.time:5.1f}s", mode, f"A={a:.2f} ({np.degrees(a):2.0f}°)",
-             f"joelho {knee:.3f} N·m {100 * knee / SG90_TORQUE:3.0f}% SG90",
-             f"incl {leg.tilt_deg(d):4.1f}°", f"tronco {leg.torso_z(d) * 1000:5.1f}mm"]
-    soft = [n for n, s in zip(leg.names, leg.at_soft_limit(d)) if s and n != "ankle_roll"]
-    if soft and a > 0:
-        parts.append("limite de software: " + ",".join(soft))
-    if stops:
-        parts.append("NO BATENTE: " + ",".join(stops))
+    parts = [f"A={a:.2f} ({np.degrees(a):2.0f}°)", f"joelho {100 * knee / SG90_TORQUE:3.0f}% SG90 ({knee:.3f} N·m)"]
+    if worst_t > knee + 1e-3:
+        parts.append(f"maior: {worst} {100 * worst_t / SG90_TORQUE:3.0f}%")
+    alerts = []
+    soft = [n for n, s, t in zip(leg.names, leg.at_soft_limit(d), leg.types) if s and t != "ankle_roll"]
     if leg.fallen(d):
-        parts.append("CAIU (Backspace para recomeçar)")
-    return " | ".join(parts)
+        alerts.append("CAIU (Backspace)")
+    if stops:
+        alerts.append("NO BATENTE: " + ",".join(stops))
+    if soft and a > 0:
+        alerts.append("limite software: " + ",".join(soft))
+    rest = [f"incl {leg.tilt_deg(d):4.1f}°", f"tronco {leg.torso_z(d) * 1000:5.1f}mm", mode, f"t={d.time:5.1f}s"]
+    return " | ".join(parts + alerts + rest)
 
 
 def ramp(current: float, target: float, dt_s: float) -> float:
@@ -184,7 +208,7 @@ def _viewer_loop(m, d, leg, rec, state, on_key, log_every, print_every):
                     state["mode"] = "manual"
                 if state["mode"] == "auto":
                     state["a_cmd"] = ramp(state["a_cmd"], state["a"], m.opt.timestep)
-                    d.ctrl[:] = crouch_targets(state["a_cmd"])
+                    d.ctrl[:] = leg.ctrl_for(state["a_cmd"])
                 last_written = d.ctrl.copy()
                 mujoco.mj_step(m, d)
                 last_time = d.time
@@ -192,7 +216,8 @@ def _viewer_loop(m, d, leg, rec, state, on_key, log_every, print_every):
                 if step % log_every == 0:
                     rec.write(d, state["mode"], state["a"])
                 if step % print_every == 0:
-                    sys.stdout.write("\r\033[K" + status_line(leg, d, state["mode"], state["a"]))
+                    cols = shutil.get_terminal_size((120, 20)).columns
+                    sys.stdout.write("\r\033[K" + status_line(leg, d, state["mode"], state["a"])[: cols - 1])
                     sys.stdout.flush()
             if step % 8 == 0:
                 v.sync()
@@ -208,11 +233,11 @@ def settle(m, a: float, seconds: float = 3.0):
     a_cmd = 0.0
     while d.time < abs(a) / RAMP_SPEED + seconds:
         a_cmd = ramp(a_cmd, a, m.opt.timestep)
-        d.ctrl[:] = crouch_targets(a_cmd)
+        d.ctrl[:] = leg.ctrl_for(a_cmd)
         mujoco.mj_step(m, d)
         if leg.fallen(d):
             return dict(fallen=True, time=d.time)
-    return dict(fallen=False, knee=abs(float(d.actuator_force[1])), tilt=leg.tilt_deg(d),
+    return dict(fallen=False, knee=leg.knee_torque(d), tilt=leg.tilt_deg(d),
                 z=leg.torso_z(d), stops=[n for n, s in zip(leg.names, leg.on_stop(d)) if s])
 
 
@@ -240,9 +265,9 @@ def run_sweep(m: mujoco.MjModel):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sweep", action="store_true", help="no window: test every crouch depth and report")
-    ap.add_argument("--model", default=str(MODEL))
+    ap.add_argument("--model", default="f0", help="f0, f1 or a path to an MJCF file")
     args = ap.parse_args()
-    m = mujoco.MjModel.from_xml_path(args.model)
+    m = mujoco.MjModel.from_xml_path(str(MODELS.get(args.model, args.model)))
     run_sweep(m) if args.sweep else run_viewer(m)
 
 

@@ -49,6 +49,14 @@ Convenção de sinal (simulação): agachar é quadril **+**, joelho **−**, to
   **software do tornozelo em 40°**, com o joelho fazendo 0,067 N·m (37 % do SG90).
 - Em operação normal nenhuma junta chega ao batente.
 
+### Deslocar o peso para o lado (resultado da F1)
+
+O robô não tem **quadril roll**. Consequência: com os dois pés no chão, os tornozelos roll ficam
+travados, e para apoiar numa perna o **corpo inteiro inclina para o lado** (~18°, faixa estável
+10°–26° no modelo de 359 g com quadris a 55 mm). Quadris mais próximos reduzem essa inclinação.
+Alternativa a avaliar depois da F2: acrescentar quadril roll (+2 servos, +18 g, 10 DOF) para o
+tronco ficar nivelado.
+
 ## Medidas da perna
 
 Pendente — sai da varredura na GPU (F2).

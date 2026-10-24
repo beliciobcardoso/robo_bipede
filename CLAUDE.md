@@ -39,9 +39,13 @@ Python environment (analysis + simulation, pinned): `uv venv .venv && uv pip ins
 .venv/bin/python sim/tools/smoke_test.py   # MuJoCo CPU vs MJX GPU (JAX and Warp backends); must print SMOKE TEST PASSED
 .venv/bin/python sim/tools/monitor.py      # viewer + exact crouch keys + live torque; logs every run to sim/logs/*.csv (read these to see what the user did)
 .venv/bin/python sim/tools/monitor.py --sweep   # headless: every crouch depth -> knee torque, falls, joint-stop hits
+.venv/bin/python sim/tools/build_biped.py     # regenerate sim/models/f1_biped.xml from BipedParams (mm, g) — never hand-edit that XML
+.venv/bin/python sim/tools/f1_experiments.py  # F1: rise-speed peaks and one-leg stance search on the whole biped
 ```
 
-Simulation gotchas (measured on this machine, F0):
+Simulation gotchas (measured on this machine, F0/F1):
+- No hip roll: with both feet down the ankle rolls are kinematically locked; standing on one foot means tilting the whole body ~18°. Don't model weight shift as a torso slide.
+- Always ramp posture changes (servo-like speed); jumping the targets makes the boxes robot fall and gives misleading torques.
 - Use MJX with `impl="warp"` and `graph_mode=JaxCallableGraphMode.WARP` (from `warp._src.jax.ffi`). The default graph mode fails with `CUDA_ERROR_NOT_SUPPORTED` (nested CUDA graphs); WARP mode is also the fastest (~4.7 M steps/s at 16k robots vs ~0.2 M for `impl="jax"` and ~70 k for one CPU core).
 - Warp preallocates for the whole batch: pass `naconmax` (≈ contacts per robot × batch) and `njmax` to `mjx.make_data`.
 - Set `XLA_PYTHON_CLIENT_PREALLOCATE=false` before importing JAX, or it grabs 75 % of the 12 GB VRAM.

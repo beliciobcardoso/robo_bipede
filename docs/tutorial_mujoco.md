@@ -148,7 +148,7 @@ quadril e tornozelo compensam). O monitor aplica essa regra sozinho; você só e
 4. Olhe o **terminal**: uma linha se atualiza sozinha, assim:
 
    ```
-   t= 12.4s | auto | A=0.40 rad ( 23°) | joelho 0.041 N·m =  23% do SG90 | inclinação  1.6° | tronco 136.2 mm
+   A=0.40 (23°) | joelho  23% SG90 (0.041 N·m) | incl  1.6° | tronco 136.2mm | auto | t= 12.4s
    ```
 
    Espere o número do joelho parar de mudar (1–2 segundos) e anote na tabela.
@@ -198,6 +198,48 @@ Painel da esquerda → **Rendering** → ligue **Contact Point** e **Contact For
 
 ---
 
+## Passo 8 — O robô completo (F1)
+
+Até aqui foi um robô de mentira, com uma perna só. Agora o modelo é o **robô inteiro**, ainda
+feito de caixinhas, mas com as massas estimadas das peças de verdade (**359 g** no total):
+
+- **caixa laranja** = tronco (bateria, ESP32, MPU-6050, regulador e capa);
+- **caixinhas azuis** = os 8 servos SG90, cada um no lugar onde vai ficar;
+- **cinza** = coxas, canelas e pés.
+
+1. Feche o visualizador que estiver aberto e rode:
+
+   ```bash
+   .venv/bin/python sim/tools/monitor.py --model f1
+   ```
+
+2. Clique uma vez na área 3D e use **as mesmas teclas** do Passo 5 (1, 2, 3, 4, +, −, Backspace).
+   As **duas pernas** agacham juntas.
+3. Anote o torque do joelho no terminal:
+
+| A | Graus | Torque do joelho esperado | % do SG90 | Seu valor |
+|---|-------|---------------------------|-----------|-----------|
+| 0 (tecla 1) | 0° | 0,000 N·m | 0 % | |
+| 0,2 (tecla 2) | 11° | 0,010 N·m | 5 % | |
+| 0,4 (tecla 3) | 23° | 0,019 N·m | 10 % | |
+| 0,6 (tecla 4) | 34° | 0,027 N·m | 15 % | |
+| 0,7 (tecla 4 + duas vezes **+**) | 40° | 0,031 N·m | 17 % | |
+
+**Por que é menos que no Passo 5**, mesmo o robô sendo mais pesado: agora são **duas pernas**
+dividindo o peso, e o tronco é mais leve em relação ao total.
+
+### O que eu já medi com este modelo
+
+Rodei os testes que você ainda não consegue fazer pelo visualizador
+(`.venv/bin/python sim/tools/f1_experiments.py` — roda sem janela, só texto):
+
+- **Levantar rápido é o que mais exige do servo.** Saindo de 34° de agachamento: em 1,2 s o
+  joelho chega a 43 % do SG90; em 0,6 s, 71 %; em 0,3 s, 100 % (o servo não dá conta); em 0,15 s
+  o robô cai.
+- **Ficar numa perna exige inclinar o corpo inteiro para o lado** (uns 18°), porque o robô não
+  tem junta de quadril para o lado. Inclinado assim, o peso fica em cima do pé de apoio e o
+  servo trabalha pouco (joelho 11 %). Inclinação menor que 10° ou maior que 26°: tomba.
+
 ## Problemas comuns
 
 | Problema | O que fazer |
@@ -205,6 +247,7 @@ Painel da esquerda → **Rendering** → ligue **Contact Point** e **Contact For
 | A área 3D está vazia/cinza | Feche e abra de novo; se continuar, me mande um print |
 | Mexi no controle e nada aconteceu | A simulação está pausada: aperte **Espaço** (o botão **Run** fica verde) |
 | No monitor, as teclas 1–4 não fazem nada | Clique uma vez dentro da área 3D antes de apertar |
+| Aparece `maior: ankle_roll_l …` no terminal | É a junta que está fazendo mais força naquele momento — normal ao se mexer |
 | O robô caiu e não levanta | Normal — ele não sabe levantar. **Backspace** |
 | Não acho o campo do **Watch** | Clique na barra **Watch** para abrir a seção |
 | O terminal não responde | Ele está esperando a janela fechar. Feche a janela do MuJoCo |
