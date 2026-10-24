@@ -1,6 +1,11 @@
 # Robô bípede
 
-Bípede de 8 DOF com servos SG90, ESP32 e MPU-6050 para equilíbrio.
+Bípede com 16 servos SG90 (8 nas pernas, 4 em cada braço), ESP32, MPU-6050 para equilíbrio e
+sensor ultrassônico HC-SR04 na cabeça.
+
+![Prévia 3D do robô](docs/img/previa_robo.png)
+
+Prévia gerada das medidas atuais — [como ver e atualizar](docs/previa.md).
 
 | Perna (×2) | Junta | Eixo |
 |------------|-------|------|

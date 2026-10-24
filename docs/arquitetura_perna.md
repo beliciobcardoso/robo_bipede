@@ -97,7 +97,9 @@ Se 1 ou 2 falhar, a decisão volta para discussão.
 | Pé | **45 × 70 mm** | Largura = quadris − 5 mm, para os pés não se tocarem |
 | Massa das capas | **meta 35 g, limite 50 g no total** | Validado a 1 passo/s com 50 g (tronco 20 g + 15 g por perna) |
 
-Altura do centro do tronco em pé: ~158 mm. Massa total estimada: 359 g.
+Altura do centro do tronco em pé: ~158 mm. Massa total estimada: 359 g só com as pernas; **569 g**
+com cabeça, braços de 4 servos, LiPo de 55 g e capas no corpo inteiro (proporção aprovada em 24/10, ver
+[arquitetura_corpo.md](arquitetura_corpo.md)). Centro do tronco em pé: ~170 mm.
 
 Robô atual na simulação (aberto, sem controle de equilíbrio):
 

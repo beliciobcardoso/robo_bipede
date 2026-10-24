@@ -3,7 +3,7 @@
 Acompanhamento do robô bípede. Marque `[x]` ao concluir. Cada item diz **quem** faz:
 **(você)**, **(Claude)** ou **(juntos)**. Itens dentro de uma seção estão na ordem sugerida.
 
-Documentos de apoio: [materiais](lista_materiais.md) · [capas](capas.md) · [medidas do servo](medidas_servo_sg90.md) ·
+Documentos de apoio: [corpo inteiro](arquitetura_corpo.md) · [prévia 3D](previa.md) · [materiais](lista_materiais.md) · [capas](capas.md) · [medidas do servo](medidas_servo_sg90.md) ·
 [tutorial PartDesign](tutorial_servo_partdesign.md) · [tutorial MuJoCo](tutorial_mujoco.md) · [plano de simulação](simulacao.md)
 
 ---
@@ -20,6 +20,20 @@ Documentos de apoio: [materiais](lista_materiais.md) · [capas](capas.md) · [me
 - [x] Comparador de modelos na GPU (`tools/compare_meshes.py`) **(Claude)**
 - [x] Plano de simulação escrito e aprovado (`docs/simulacao.md`) **(juntos)**
 - [x] F0 — ambiente de simulação na RTX 3060 (MuJoCo + MJX/Warp), teste de fumaça passando **(Claude)**
+- [x] Cabeça com HC-SR04 (+ reserva de 10 g para câmera) e braços com 2 servos cada (ombro pitch + roll), simulados e aprovados em 24/10: 410 g com LiPo de 55 g, tornozelo roll 57 / 64 % a 0,5 / 1 passo/s **(juntos)**
+- [x] Corpo inteiro num só modelo (`sim/tools/body.py`): servo por junta, capas com massa calculada pela forma, checagem do que fica fora das capas, estudo de proporções ([arquitetura_corpo.md](arquitetura_corpo.md)) — com capas honestas o robô atual tem 486 g **(Claude)**
+
+## Decisão agora
+
+- [x] Servos: **SG90 em todas as 12 juntas** — decidido em 24/10 **(você)**
+- [x] Proporção do corpo: tronco 68 mm, ombros 86 mm, cabeça grande, parede 1,2 mm — decidido em 24/10 ([arquitetura_corpo.md](arquitetura_corpo.md)) **(você)**
+- [x] Aplicada em `sim/tools/body.py`; prévia, F1 e documentos refeitos: 254 mm, 518 g, ritmo com folga até ~0,7 passo/s **(Claude)**
+- [x] Braço com cotovelo e punho que gira, mão fixa (4 SG90 por braço, 16 no total) — decidido em 24/10 **(você)**; cadeia modelada pelas marcações das 8 cabeças, simulado: 573 g, ritmo até ~0,67 passo/s ([arquitetura_corpo.md](arquitetura_corpo.md)) **(Claude)**
+- [x] Forma das capas: quase retas — ombros 18,2 cm, 569 g — decidido em 24/10 **(você)**
+
+## Sempre
+
+- [ ] Atualizar a [prévia 3D](previa.md) a cada mudança de medida, peça ou conceito (`make preview` + histórico) **(Claude)** — item permanente
 
 ## 1. Compras
 
@@ -28,11 +42,17 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Rolamentos 623ZZ chegarem (já comprados) **(você)**
 - [ ] Impressora 3D **(você)**
 - [ ] Filamento PETG **(você)**
-- [ ] Regulador buck 5–6 V ≥ 5 A **(você)**
+- [ ] UBEC 5–6 V ≥ 10 A (16 servos) **(você)**
+- [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
+- [ ] 8 servos SG90 para os braços + reservas novas **(você)**
+- [ ] PCA9685 (16 canais de PWM; os 16 servos ocupariam todos os 16 canais do LEDC do ESP32) **(você)**
+- [ ] HC-SR04 **(você)**
+- [ ] Fusível ~10 A de ação retardada no lugar do de 5 A **(você)**
 - [ ] Parafusaria: M3 (8/10/12/16), porcas M3 autotravantes, arruelas M3, M2 (6/8) **(você)**
 - [ ] Borracha antiderrapante para a sola **(você)**
 - [ ] INA219 — necessário para a bancada do servo (F3) **(você)**
-- [ ] Opcionais: PCA9685, sensores de força no pé, insertos roscados, analisador lógico **(você)**
+- [ ] Opcionais: sensores de força no pé, insertos roscados, analisador lógico **(você)**
+- [ ] Futuro: ESP32-CAM para a câmera na cabeça **(você)**
 
 ## 2. Simulação
 
@@ -100,6 +120,9 @@ Peças compradas têm modelo de referência por script.
 - [ ] Pé com sola, com encaixes da capa **(você)**
 - [ ] Quadril modular: suporte do quadril com espaço reservado no tronco para um servo de quadril roll de cada lado, caso a decisão dos 8 DOF mude **(juntos)**
 - [ ] Quadril/tronco: ESP32, bateria, MPU-6050 no centro, placa de distribuição, **com encaixes da capa e acesso de manutenção** **(você)**
+- [ ] Conceito do ombro: servo do ombro pitch dentro do tronco com 623ZZ (tronco de 86 mm nos ombros), elo até o garfo do ombro roll; servo do ombro roll dentro do braço; braço a 3 mm da perna — provisório na [prévia](previa.md) **(juntos)**
+- [ ] Ombro (suporte do pitch no tronco + elo + suporte do roll), braço, cotovelo (garfo sem rolamento), antebraço, punho e mão, com encaixes da capa **(você)**
+- [ ] Cabeça: suporte do HC-SR04 voltado para a frente, espaço e passagem de cabo para a câmera futura, com encaixes da capa **(você)**
 - [ ] Montagem virtual: checar colisões e amplitude de cada junta — **com as capas montadas** **(juntos)**
 - [ ] Modelos de referência que faltam: parafusos/porcas M3, ESP32 DevKit, MPU-6050, bateria **(Claude)**
 
@@ -118,6 +141,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 - [ ] Ventilação: saída de ar para o regulador buck e os servos **(juntos)**
 - [ ] Capas da perna: coxa, canela, tornozelo e pé **(você)**
 - [ ] Capa do quadril/tronco, com as aberturas de acesso **(você)**
+- [ ] Capas dos braços e da cabeça (janela para os dois "olhos" do HC-SR04 e para a câmera) **(você)**
 - [ ] Revisão: capas não limitam a amplitude das juntas nem encostam umas nas outras **(Claude)**
 
 ## 4. Impressão e montagem
@@ -131,14 +155,15 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 ## 5. Eletrônica
 
-- [ ] Esquema elétrico: bateria → fusível → chave → buck → trilho dos servos; ESP32; MPU; divisor da bateria **(juntos)**
+- [ ] Esquema elétrico: bateria → fusível → chave → UBEC → trilho dos 16 servos; ESP32 + PCA9685 (I2C); MPU; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
 - [ ] Placa de distribuição em placa perfurada **(você)**
 - [ ] Teste com fonte de bancada limitando corrente, antes da bateria **(você)**
 - [ ] Fiação no robô com extensões e organização dos cabos **(você)**
 
 ## 6. Firmware (ESP32)
 
-- [ ] PWM dos 8 servos pelo LEDC **(juntos)**
+- [ ] PWM dos 16 servos pelo PCA9685 (I2C) **(juntos)**
+- [ ] Leitura do HC-SR04: distância à frente, parar antes de obstáculo **(juntos)**
 - [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
 - [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**
 - [ ] Leitura do MPU-6050 + filtro (da F6) **(juntos)**

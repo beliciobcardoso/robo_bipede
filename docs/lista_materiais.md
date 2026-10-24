@@ -2,44 +2,56 @@
 
 Marque `[x]` no que já tem. Itens **(opcional)** não bloqueiam o projeto.
 
-Meta de massa total: **≤ 400 g**. Acima disso o joelho e o tornozelo do SG90 trabalham sem margem
-no apoio de uma perna só — por isso bateria e eletrônica leves importam.
+Massa total: **569 g** (proporção estilo Alpha, 254 mm de altura, 16 servos, capas quase retas de 175 g
+calculadas pela forma — 24/10). **SG90 em todas as juntas** (decisão de
+24/10): joelho e tornozelo roll ficam no limite a 1 passo/s e com folga a 0,5 passo/s — ver
+[arquitetura_corpo.md](arquitetura_corpo.md).
 
-> **Configuração: 8 DOF** — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll.
+> **Configuração: 16 servos SG90** — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll;
+> por braço: ombro pitch, ombro roll, cotovelo, punho (gira). Mão fixa. Cabeça fixa com o sensor
+> ultrassônico (aprovado em 24/10).
+
 
 ## Atuadores
 
-- [X] **Servo SG90 (clone)** — 8 — juntas
+- [X] **Servo SG90 (clone)** — 8 — juntas das pernas
+- [ ] **Servo SG90 (clone) para os braços** — 8 — ombro pitch, ombro roll, cotovelo e punho de cada
+  braço; comprar também reservas novas (as atuais não devem virar servo de braço)
 - [X] **Servo SG90 reserva** — 2 a 4 — engrenagem plástica de clone espana; ter reserva evita parar o projeto
 - [X] **Horns** (braço simples e cruz) — vêm com o servo — fixação no eixo
 - [X] **Parafusos do servo** (abas + horn) — vêm com o servo
 
 ## Controle e sensores
 
-- [X] **ESP32 DevKit** — 1 — controle; PWM dos servos direto pelo LEDC (16 canais)
+- [X] **ESP32 DevKit** — 1 — controle, MPU-6050, HC-SR04, Wi-Fi
 - [X] **MPU-6050** (acelerômetro + giroscópio 3 eixos) — 1 — equilíbrio; I2C, montar no centro do tronco
-- [ ] **PCA9685** (driver PWM 16 canais, I2C) **(opcional)** — 1 — tira o PWM do ESP32; não é necessário para 6–8 servos
+- [ ] **PCA9685** (driver PWM 16 canais, I2C) — 1 — **necessário**: os 16 servos ocupariam todos os 16 canais do LEDC do ESP32
+- [ ] **HC-SR04** (sensor ultrassônico) — 1 — na cabeça, olhando para a frente; ECHO sai em 5 V → divisor resistivo (ex.: 1 kΩ + 2 kΩ) antes do GPIO
+- [ ] **ESP32-CAM** **(futuro)** — 1 — câmera na cabeça como placa separada, falando com o ESP32 principal por UART; 10 g já reservados na massa
 - [ ] **INA219** (sensor de corrente/tensão I2C) **(opcional)** — 1 — medir consumo dos servos, detectar travamento
 - [ ] **FSR / sensor de força no pé** **(opcional)** — 2 a 8 — detectar contato do pé com o chão
 - [X] **Buzzer + LED de status** **(opcional)** — 1 — feedback de estado e bateria fraca
 
 ## Alimentação
 
-Pico de corrente: SG90 trava em ~0,7 A cada → 8 servos podem pedir **~6 A** em pico.
+Pico de corrente: SG90 trava em ~0,7 A cada → 16 servos podem pedir **~11 A** em pico (pior caso
+teórico, por exemplo todos se movendo ao ligar; andando, os braços ficam quase parados — medir o real
+com o INA219 na F3).
 
-- [X] **Bateria 2S (7,4 V)** — 1 — LiPo 800–1500 mAh (~50–80 g) ou 2× 18650 em série (~95 g)
+- [X] **Bateria 2S (7,4 V)** — 1 — **LiPo 2S ~800 mAh, ~55 g** (decidido em 24/10: com braços, as
+  2× 18650 de ~95 g tiram a margem do tornozelo roll). Se o que você tem são 18650, desmarque e compre a LiPo
 - [X] **BMS 2S** — 1 — só se usar 18650 sem proteção
-- [ ] **Regulador buck 5–6 V, ≥ 5 A contínuo** (UBEC ou módulo XL4015/equivalente) — 1 — trilho dos servos
+- [ ] **UBEC 5–6 V, ≥ 10 A** — 1 — trilho único dos 16 servos (trilho separado para os braços não compensa a fiação extra)
 - [X] **Capacitor eletrolítico 470–1000 µF / 16 V** — 2 — junto ao trilho dos servos, segura queda nos picos
-- [X] **Chave liga/desliga ≥ 5 A** — 1
-- [X] **Fusível ou PTC ~5 A** — 1 — proteção da bateria
+- [X] **Chave liga/desliga ≥ 5 A** — 1 — conferir se aguenta ~11 A de pico com 16 servos
+- [X] **Fusível ou PTC ~5 A** — 1 — proteção da bateria; **com 16 servos, trocar por ~10 A de ação retardada**
 - [X] **Divisor resistivo para medir bateria** (ex.: 100 kΩ + 33 kΩ) — 1 — ADC do ESP32, corte por subtensão
 - [X] **Carregador balanceado 2S** (ou carregador 18650) — 1
 - [X] **Conector de bateria** (XT30 ou JST) — 1 par
 
 ## Cabeamento e montagem eletrônica
 
-- [X] **Extensão de cabo de servo 15–30 cm** — 4 a 8 — servos do joelho e tornozelo até o tronco
+- [X] **Extensão de cabo de servo 15–30 cm** — 4 a 8 — servos do joelho e tornozelo até o tronco (+6 para ombro roll, cotovelo e punho)
 - [X] **Barra de pinos macho 3 vias** — para placa de distribuição dos servos
 - [X] **Placa perfurada** (ou PCB própria) — 1 — distribuição de alimentação + ESP32 + MPU
 - [X] **Fio silicone 18–20 AWG** — trilho de potência
