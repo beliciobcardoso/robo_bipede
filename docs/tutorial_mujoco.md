@@ -234,11 +234,14 @@ Rodei os testes que você ainda não consegue fazer pelo visualizador
 (`.venv/bin/python sim/tools/f1_experiments.py` — roda sem janela, só texto):
 
 - **Levantar rápido é o que mais exige do servo.** Saindo de 34° de agachamento: em 1,2 s o
-  joelho chega a 43 % do SG90; em 0,6 s, 71 %; em 0,3 s, 100 % (o servo não dá conta); em 0,15 s
-  o robô cai.
+  joelho chega a 34 % do SG90; em 0,6 s, 53 %; em 0,3 s, 90 %; em 0,15 s, 100 % (o servo não dá
+  conta).
 - **Ficar numa perna exige inclinar o corpo inteiro para o lado** (uns 18°), porque o robô não
   tem junta de quadril para o lado. Inclinado assim, o peso fica em cima do pé de apoio e o
   servo trabalha pouco (joelho 11 %). Inclinação menor que 10° ou maior que 26°: tomba.
+- **Balançar de um pé para o outro**, como na passada, funciona até ~1 passo por segundo: o
+  tornozelo roll chega a 61 % do SG90 e o joelho a 69 %. Mais rápido que isso, os servos não dão
+  conta (`.venv/bin/python sim/tools/rocking_test.py`).
 
 ## Problemas comuns
 

@@ -21,7 +21,7 @@
     <material name="torso" rgba="0.95 0.55 0.15 1"/>
   </asset>
   <default>
-    <joint damping="0.05" armature="0.0005" limited="true"/>
+    <joint damping="0.017" armature="0.0005" limited="true"/>
     <position kp="1.5" forcerange="-0.18 0.18" ctrllimited="true"/>
     <default class="visual"><geom contype="0" conaffinity="0"/></default>
     <default class="contact"><geom contype="1" conaffinity="1" friction="0.8 0.02 0.001"/></default>

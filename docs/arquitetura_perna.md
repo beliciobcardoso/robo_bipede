@@ -54,8 +54,31 @@ Convenção de sinal (simulação): agachar é quadril **+**, joelho **−**, to
 O robô não tem **quadril roll**. Consequência: com os dois pés no chão, os tornozelos roll ficam
 travados, e para apoiar numa perna o **corpo inteiro inclina para o lado** (~18°, faixa estável
 10°–26° no modelo de 359 g com quadris a 55 mm). Quadris mais próximos reduzem essa inclinação.
-Alternativa a avaliar depois da F2: acrescentar quadril roll (+2 servos, +18 g, 10 DOF) para o
-tronco ficar nivelado.
+**Decisão (24/10): manter 8 DOF, sem quadril roll.** O robô apoia numa perna inclinando o corpo
+inteiro para o lado (andar "rebolado"). Motivos: menos peças, menos peso e menos servos para
+calibrar, e na F1 o SG90 trabalhou com folga nessa postura (joelho 11 %, tornozelo roll 2–32 %).
+Consequências para as próximas fases:
+- a passada (F5) é do tipo "rebolado": inclina para o lado, levanta o pé de fora, dá o passo;
+- a **largura do quadril** é a alavanca para reduzir a inclinação — entra na varredura da F2;
+- o **tornozelo roll** é a junta que controla o equilíbrio lateral (pé de apoio).
+
+Condições para manter a decisão:
+1. **Balanço lateral em movimento:** o pico do tornozelo roll ao inclinar o corpo de um pé para o
+   outro, no ritmo da passada, deve ficar abaixo de **~70 % do SG90**.
+2. **Inclinação:** depois de afinar a largura do quadril (F2), a inclinação para apoiar numa
+   perna deve ficar abaixo de **~20°**.
+3. **Quadril modular:** o suporte do quadril e o tronco reservam espaço para um servo de quadril
+   roll de cada lado, para que a mudança, se vier, não obrigue a refazer tronco, capas e fiação.
+
+Se 1 ou 2 falhar, a decisão volta para discussão.
+
+**Situação (24/10):**
+- Condição 1 — **passa, com folga apertada a 1 passo/s.** Balanço lateral sem controle: tornozelo
+  roll 53 % a 0,5 passo/s e 61 % a 1 passo/s; passa de 70 % só acima disso (85 % a 1,33 passo/s).
+  O joelho chega a 69 % a 1 passo/s. Números preliminares: dependem do amortecimento do servo
+  (estimado; a F3 mede) e do padrão de movimento (a F5 refina).
+- Condição 2 — pendente da F2.
+- Condição 3 — entra no projeto do quadril.
 
 ## Medidas da perna
 
