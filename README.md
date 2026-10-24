@@ -35,3 +35,5 @@ Convenções:
 |------|--------|--------|
 | Servo SG90 clone (referência) | `cad/parts/servo_sg90.py` | medido ([ficha](docs/medidas_servo_sg90.md)) |
 | Rolamento 623ZZ 3×10×4 (referência) | `cad/parts/bearing_623zz.py` | d/D/B norma ISO; anéis e encostos nominais |
+| Encaixe da capa — lado da capa (clipe + pinos) | `cad/parts/snap_clip.py` | dimensões aprovadas ([capas](docs/capas.md)); folgas a validar no teste |
+| Encaixe da capa — lado do esqueleto (rebaixo + furos) | `cad/parts/snap_socket.py` | idem; o build confere o encaixe montado |

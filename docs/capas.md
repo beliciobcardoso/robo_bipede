@@ -52,7 +52,7 @@ nas peças são as mesmas.
 | Altura do gancho (y) | 0,6 mm | quanto a lingueta dobra para passar |
 | Ângulo de entrada | 30° | entra fácil |
 | Ângulo de retenção | 60° | segura, mas sai puxando firme (90° não sairia mais) |
-| Folga atrás da lingueta | 0,8 mm | gancho + 0,2 mm |
+| Profundidade do rebaixo no esqueleto | 0,8 mm | gancho + 0,2 mm (a lingueta dobra para **fora**, no ar, através de um rasgo de 0,5 mm em volta dela) |
 
 Conferência da deformação (fórmula padrão de clipe retangular): ε = 1,5 · t · y / L² =
 1,5 × 1,2 × 0,6 / 8² ≈ **1,7 %**. O PETG escoa por volta de 4–5 %; para abrir e fechar muitas
@@ -75,6 +75,40 @@ vezes recomenda-se ficar abaixo de ~2 %. Força para dobrar a lingueta: ~4 N por
 | Parede da capa | 1,2 mm (3 voltas de bico 0,4 mm) |
 | Encaixes por capa pequena (coxa, canela, pé) | 2 clipes + 2 pinos-guia |
 | Encaixes por capa grande (tronco) | 4 clipes + 2 pinos-guia |
+
+## Modelo de referência
+
+Dois scripts, no mesmo sistema de coordenadas (posição montada), geram as duas metades — que são
+também as duas peças da parte de encaixe da **peça de teste de tolerância**:
+
+| Script | Metade | O que tem |
+|--------|--------|-----------|
+| `cad/parts/snap_clip.py` | **capa** | parede vertical com a lingueta + gancho, aba no topo que apoia no esqueleto, 2 pinos-guia descendo da aba |
+| `cad/parts/snap_socket.py` | **esqueleto** | bloco com o rebaixo do gancho na face lateral e os 2 furos dos pinos na face de cima |
+
+```
+        aba da capa (apoia no topo do esqueleto)
+   ┌───────────────────────────────┐   ← pinos-guia descem daqui para os furos
+   │ parede lateral da capa        │
+   │   ┌──────────lingueta───┐▶gancho entra no rebaixo da lateral do esqueleto
+   │   └─────────────────────┘     │
+   └───────────────────────────────┘
+     a capa é empurrada para baixo; o gancho desliza na lateral e estala no rebaixo
+```
+
+Como a capa entra: **de cima para baixo**. Por isso:
+- a lingueta corre **na horizontal** dentro da parede lateral — impressa deitada, como manda a regra;
+- os pinos-guia são **verticais**, na mesma direção da entrada (de lado, a capa não desceria);
+- a capa é impressa **de cabeça para baixo** (aba na mesa): lingueta na horizontal, pinos para cima.
+
+O build do lado do esqueleto **monta as duas metades e confere** que não há material sobreposto
+(a checagem foi testada: com o rebaixo 0,3 mm mais raso que o gancho, ela acusa).
+
+Nota: os pinos têm 3 mm e o gancho começa a 4 mm do topo, então **o gancho toca a lateral antes de
+os pinos entrarem nos furos** — alinhe a capa com a mão no começo; os pinos guiam os últimos 3 mm.
+Se no teste isso incomodar, a saída é pino mais longo.
+
+Cortes do encaixe montado: `cad/build/snap_preview.png` (gerado; não versionado).
 
 As folgas (0,2 mm do gancho, 0,15 mm do pino) são o ponto de partida; o valor final sai da peça de
 teste de tolerância, porque depende da impressora.

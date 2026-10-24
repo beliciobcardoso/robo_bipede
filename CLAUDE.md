@@ -73,12 +73,13 @@ flatpak run --env=SRC=$PWD/cad/manual/servo_sg90.FCStd --env=OBJ=Body --env=OUT=
 - Geometric constraints are encoded as derived `@property`s rather than duplicated numbers (e.g. `shaft_offset = tower_d / 2` because the gear tower is flush with the case wall).
 - Dimensions of purchased parts come from caliper measurements recorded in `docs/medidas_<part>.md`; unmeasured values are commented `nominal`. Keep the doc and the dataclass in sync when a value changes.
 - **Servo coordinate frame** (shared by every part that mounts a servo): origin on the output shaft axis at the tab underside (seat plane), +Z toward the shaft, +X along the body from the shaft end. The SG90 clone's cable exits on the shaft-side end face.
+- Cover mount reference: `snap_clip.py` (cover half) and `snap_socket.py` (skeleton half) share `SnapDims` and an assembled-position frame (skeleton top face z = 0, side face y = 0, cover pushed down −Z). `snap_socket` builds the cover half too and fails if they overlap; the Makefile rebuilds it when `snap_clip.py` changes.
 - Joint pivots: a 623ZZ bearing opposite each servo shaft, M3 screw as pin. `BearingDims` carries the abutment limits (`da min` / `Da max`) that spacers and housing shoulders must respect so they touch only the correct ring.
 
 ## FreeCADCmd gotchas
 
 - It **exits 0 even when the script raises**. The Makefile detects failure by grepping for `Exception` and checking the output file exists — keep that when changing the build.
-- A script file runs with `__name__` equal to its module name, not `"__main__"`; guard with `if __name__ in ("__main__", DOC_NAME):`.
+- A script file runs with `__name__` equal to its module name, not `"__main__"` — the same value an import gives. Guard with `if run_as_script(__name__, DOC_NAME):` (cadlib; checks the script path in `sys.argv`), so parts can import each other's DIMS without re-running the other part's build.
 - The flatpak has a private `/tmp`: scripts and files passed to `FreeCADCmd` must live under `$HOME` (e.g. inside the repo), never `/tmp`. Pass inputs via `flatpak run --env=VAR=...`.
 - `doc.saveAs` over an existing file leaves `.FCBak` backups; `export_part` deletes the old `.FCStd` first.
 - Headless visual check: tessellate the shape (`Part.read(step).tessellate(0.1)`) and render with matplotlib (bundled in the flatpak's Python) to a PNG.

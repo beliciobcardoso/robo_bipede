@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import FreeCAD as App
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from cadlib import add_box, add_cylinder, cut, export_part, fuse  # noqa: E402
+from cadlib import add_box, add_cylinder, cut, export_part, fuse, run_as_script  # noqa: E402
 
 DOC_NAME = "servo_sg90"
 
@@ -135,6 +135,5 @@ def main():
     export_part(doc, build(doc), DOC_NAME)
 
 
-# FreeCADCmd runs a script file with __name__ == its module name, not "__main__"
-if __name__ in ("__main__", DOC_NAME):
+if run_as_script(__name__, DOC_NAME):
     main()
