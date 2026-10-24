@@ -38,9 +38,10 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 
 Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o projeto mecânico pede.
 
+- [x] Aprovar o plano de simulação **(você)**
 - **F0 — Ambiente**
-  - [x] Instalar MuJoCo + JAX com CUDA no `.venv` (versões fixadas em `requirements.txt`) **(Claude)**
-  - [x] Teste de fumaça na RTX 3060: motor Warp, ~4,7 milhões de passos/s, igual à CPU **(Claude)**
+  - [x] Instalar MuJoCo + JAX com CUDA no `.venv` — versões fixadas em `requirements.txt` **(Claude)**
+  - [x] Teste de fumaça: simulação rodando na RTX 3060 — `sim/tools/smoke_test.py`, motor Warp 4,7 M passos/s **(Claude)**
 - **F1 — Uma perna de caixinhas**
   - [ ] Modelo MuJoCo de 1 perna (4 juntas) com blocos e massas estimadas **(Claude)**
   - [ ] Abrir no visualizador, mexer as juntas e ler os torques **(você)**
