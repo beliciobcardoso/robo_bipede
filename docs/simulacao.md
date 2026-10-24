@@ -39,16 +39,30 @@ Modelo `sim/models/f1_biped.xml`, gerado por `sim/tools/build_biped.py` a partir
 |----------|--------------------|-----------|
 | Em pé, duas pernas | — | 0 % |
 | Agachado 40° (limite), duas pernas, parado | joelho | 17 % |
-| Levantar de 34° em 1,2 s | joelho (pico) | 43 % |
-| Levantar de 34° em 0,6 s | joelho (pico) | 71 % |
-| Levantar de 34° em 0,3 s | todas | **100 % — servo no limite** |
-| Levantar de 34° em 0,15 s | — | **cai** |
+| Levantar de 34° em 1,2 s | joelho (pico) | 34 % |
+| Levantar de 34° em 0,6 s | joelho (pico) | 53 % |
+| Levantar de 34° em 0,3 s | joelho (pico) | 90 % |
+| Levantar de 34° em 0,15 s | joelho | **100 % — servo no limite** |
 | Numa perna, inclinado 18° (meio da faixa estável) | joelho / tornozelo roll | 11 % / 2 % |
-| Numa perna, nas bordas da faixa (10° ou 26°) | tornozelo roll | 32 % |
+| Numa perna, nas bordas da faixa (10° ou 26°) | tornozelo roll | 40 % |
+| **Balanço lateral** a 0,5 passo/s (sem controle de equilíbrio) | tornozelo roll / joelho | 53 % / 36 % |
+| Balanço lateral a 1 passo/s | tornozelo roll / joelho | 61 % / 69 % |
+| Balanço lateral a 1,33 passo/s | tornozelo roll / joelho | 85 % / 90 % |
+
+Amortecimento das juntas no modelo: **0,017 N·m·s/rad**, estimado pelo próprio SG90 (torque de
+travamento ÷ velocidade sem carga = 0,18 ÷ 10,5). Representa a perda de força com a velocidade.
+Um primeiro chute de 0,05 inflava os picos em movimento em até ~30 pontos. A F3 (bancada) mede o
+valor real.
 
 Conclusões:
-- **Parado, o SG90 sobra.** O que aperta é **movimento rápido**: levantar em menos de ~0,5 s já
-  satura o joelho. A passada (F5) precisa respeitar essa velocidade.
+- **Parado, o SG90 sobra.** O que aperta é **movimento rápido**: levantar em ~0,3 s já leva o
+  joelho a 90 %. A passada (F5) precisa respeitar essa velocidade.
+- **Balanço lateral** (`sim/tools/rocking_test.py`): o robô passa o peso de um pé para o outro e
+  levanta o pé livre ~22 mm **sem controle de equilíbrio** até 1,33 passo/s. O tornozelo roll fica
+  abaixo de 70 % até **1 passo/s** (61 %); o joelho chega a 69 % nesse ritmo. **Ritmo-alvo da
+  primeira passada: 0,5 passo/s; teto: 1 passo/s.** Os picos dependem bastante do padrão de
+  movimento (empurrar menos e levantar menos o pé reduz o joelho de 100 % para 69 %) — a F5 vai
+  refinar.
 - **Sem quadril roll, ficar numa perna exige inclinar o corpo inteiro ~18° para o lado** (faixa
   estável de 10° a 26°). Com os dois pés no chão, os tornozelos roll ficam travados — não dá para
   deslocar o peso para o lado sem tirar um pé. É o andar "rebolado" (tipo Otto).

@@ -59,7 +59,8 @@ class BipedParams:
     # Servo model (SG90-like position servo; to be calibrated in F3)
     stall_torque_nm: float = 0.18
     kp: float = 1.5
-    joint_damping: float = 0.05
+    # torque falls with speed: stall torque / no-load speed = 0.18 N·m / 10.5 rad/s (0.1 s/60°)
+    joint_damping: float = 0.017
     armature: float = 0.0005
 
     @property
