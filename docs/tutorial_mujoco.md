@@ -148,7 +148,7 @@ quadril e tornozelo compensam). O monitor aplica essa regra sozinho; você só e
 4. Olhe o **terminal**: uma linha se atualiza sozinha, assim:
 
    ```
-   t= 12.4s | auto | A=0.40 rad ( 23°) | joelho 0.041 N·m =  23% do SG90 | inclinação  1.6° | tronco 136.2 mm
+   A=0.40 (23°) | joelho  23% SG90 (0.041 N·m) | incl  1.6° | tronco 136.2mm | auto | t= 12.4s
    ```
 
    Espere o número do joelho parar de mudar (1–2 segundos) e anote na tabela.

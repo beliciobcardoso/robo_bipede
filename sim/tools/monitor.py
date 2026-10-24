@@ -27,6 +27,7 @@ import argparse
 import csv
 import datetime as dt
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -140,19 +141,19 @@ def status_line(leg: Leg, d, mode: str, a: float) -> str:
     knee = leg.knee_torque(d)
     worst, worst_t = leg.worst_joint(d)
     stops = [n for n, s in zip(leg.names, leg.on_stop(d)) if s]
-    parts = [f"t={d.time:5.1f}s", mode, f"A={a:.2f} ({np.degrees(a):2.0f}°)",
-             f"joelho {knee:.3f} N·m {100 * knee / SG90_TORQUE:3.0f}% SG90"]
+    parts = [f"A={a:.2f} ({np.degrees(a):2.0f}°)", f"joelho {100 * knee / SG90_TORQUE:3.0f}% SG90 ({knee:.3f} N·m)"]
     if worst_t > knee + 1e-3:
         parts.append(f"maior: {worst} {100 * worst_t / SG90_TORQUE:3.0f}%")
-    parts += [f"incl {leg.tilt_deg(d):4.1f}°", f"tronco {leg.torso_z(d) * 1000:5.1f}mm"]
+    alerts = []
     soft = [n for n, s, t in zip(leg.names, leg.at_soft_limit(d), leg.types) if s and t != "ankle_roll"]
-    if soft and a > 0:
-        parts.append("limite de software: " + ",".join(soft))
-    if stops:
-        parts.append("NO BATENTE: " + ",".join(stops))
     if leg.fallen(d):
-        parts.append("CAIU (Backspace para recomeçar)")
-    return " | ".join(parts)
+        alerts.append("CAIU (Backspace)")
+    if stops:
+        alerts.append("NO BATENTE: " + ",".join(stops))
+    if soft and a > 0:
+        alerts.append("limite software: " + ",".join(soft))
+    rest = [f"incl {leg.tilt_deg(d):4.1f}°", f"tronco {leg.torso_z(d) * 1000:5.1f}mm", mode, f"t={d.time:5.1f}s"]
+    return " | ".join(parts + alerts + rest)
 
 
 def ramp(current: float, target: float, dt_s: float) -> float:
@@ -215,7 +216,8 @@ def _viewer_loop(m, d, leg, rec, state, on_key, log_every, print_every):
                 if step % log_every == 0:
                     rec.write(d, state["mode"], state["a"])
                 if step % print_every == 0:
-                    sys.stdout.write("\r\033[K" + status_line(leg, d, state["mode"], state["a"]))
+                    cols = shutil.get_terminal_size((120, 20)).columns
+                    sys.stdout.write("\r\033[K" + status_line(leg, d, state["mode"], state["a"])[: cols - 1])
                     sys.stdout.flush()
             if step % 8 == 0:
                 v.sync()
