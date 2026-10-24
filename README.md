@@ -9,7 +9,8 @@ Bípede de 8 DOF com servos SG90, ESP32 e MPU-6050 para equilíbrio.
 | 3 | Tornozelo | pitch |
 | 4 | Tornozelo | roll |
 
-Materiais: [docs/lista_materiais.md](docs/lista_materiais.md).
+Andamento: [docs/backlog.md](docs/backlog.md) · Materiais: [docs/lista_materiais.md](docs/lista_materiais.md) ·
+Simulação: [docs/simulacao.md](docs/simulacao.md).
 
 ## CAD
 
