@@ -18,11 +18,13 @@ import mujoco
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-MODELS = {"f0": ROOT / "models" / "f0_smoke.xml", "f1": ROOT / "models" / "f1_biped.xml"}
+MODELS = {"f0": ROOT / "models" / "f0_smoke.xml", "f1": ROOT / "models" / "f1_biped.xml",
+          "preview": ROOT / "models" / "preview_biped.xml"}
 SG90 = 0.18
 FALL_TILT_DEG = 30.0
 TYPES = ("hip_pitch", "knee", "ankle_pitch", "ankle_roll")
-CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0}
+CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0,
+          "shoulder_pitch": 0.0, "shoulder_roll": 0.0, "elbow": 0.0, "wrist": 0.0}   # arms stay put while crouching
 
 
 class Robot:

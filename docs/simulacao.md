@@ -106,6 +106,16 @@ Conclusões:
   A estimativa física conservadora da tabela acima marca 50 mm como reprovado a 1 passo/s (71–80 %),
   mas o balanço simulado no robô atualizado dá **tornozelo roll 57 %** e joelho 69 % a 1 passo/s,
   e 50 % / 36 % a 0,5 passo/s; inclinação numa perna 14°. As duas condições dos 8 DOF passam.
+- **Cabeça e braços (24/10):** HC-SR04 + 10 g de reserva para câmera e 2 servos por braço levam o robô
+  a 450 g com as 2× 18650 — a 0,5 passo/s a faixa de balanço que não tomba encolhe de 10–16° para
+  10–14°. Com LiPo de 55 g: **410 g**, tornozelo roll **57 % / 64 %** e joelho 36 % / 68 % a 0,5 / 1
+  passo/s (roll 14°); numa perna equilibra entre −18° e −8°. Aprovado.
+- **Corpo inteiro com capas calculadas (24/10):** capas pela forma (164 g) e proporção estilo Alpha 1
+  com SG90 em tudo (`body_variants.py`, 72 variantes): **518 g, 254 mm** — é o modelo F1 atual.
+  A roll ±12°: tornozelo roll 64 / 70 % e joelho 43 / 70 % a 0,5 / 1 passo/s; uma perna entre −14° e −10°;
+  levantar a 1 rad/s com joelho a 67 %. Ritmo com folga até ~0,7 passo/s.
+- **Braços com cotovelo e punho (24/10):** 16 servos, 573 g (569 g com as capas quase retas, mesmos picos). A roll ±12°: tornozelo roll 68 / 64 / 87 % e
+  joelho 50 / 46 / 71 % a 0,5 / 0,67 / 1 passo/s; levantar a 1 rad/s com joelho a 72 %. Ritmo até ~0,67 passo/s.
 
  usar o que existe, medir, só então criar
 

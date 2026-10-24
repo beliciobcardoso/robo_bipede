@@ -50,7 +50,7 @@ STANCE_CROUCH = 0.2             # same stance crouch as the one-leg test
 G = 9.81
 FOOT_GAP_MM = 5.0              # free space between the two feet
 FOOT_MAX_WIDTH_MM = 45.0       # widest foot tried (narrower when the hips are close)
-COVERS = {"nominais": (20.0, 15.0), "pesadas": (40.0, 30.0)}   # (torso, per leg) g
+COVERS = {"nominais": 1.0, "pesadas": 2.0}   # multiplier on the cover masses computed from their shape (body.py)
 PACES = {"05": 4.0, "10": 2.0}  # step rate label -> cycle period (s)
 
 GRID = dict(thigh=(35, 40, 45, 50, 55, 60), shin=(35, 40, 45, 50, 55, 60),
@@ -84,12 +84,11 @@ def shift_torque(mass_kg: float, h: float, half_spacing: float, tilt_rad: float,
 
 def evaluate(point: tuple) -> dict:
     thigh, shin, spacing, covers = point
-    torso_cover, leg_cover = COVERS[covers]
     base = BipedParams()
     fx, fy, fz = base.foot_size_mm
     foot_w = min(FOOT_MAX_WIDTH_MM, spacing - FOOT_GAP_MM)   # feet must not touch each other
     p = replace(base, thigh_mm=thigh, shin_mm=shin, hip_half_width_mm=spacing / 2,
-                torso_cover_g=torso_cover, leg_cover_g=leg_cover, foot_size_mm=(fx, foot_w, fz))
+                cover_scale=COVERS[covers], foot_size_mm=(fx, foot_w, fz))
     m = mujoco.MjModel.from_xml_string(build_xml(p))
     mass = float(m.body_subtreemass[1])
     row = dict(thigh_mm=thigh, shin_mm=shin, hip_spacing_mm=spacing, foot_width_mm=foot_w, covers=covers,

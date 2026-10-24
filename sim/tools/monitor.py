@@ -36,7 +36,8 @@ import mujoco
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-MODELS = {"f0": ROOT / "models" / "f0_smoke.xml", "f1": ROOT / "models" / "f1_biped.xml"}
+MODELS = {"f0": ROOT / "models" / "f0_smoke.xml", "f1": ROOT / "models" / "f1_biped.xml",
+          "preview": ROOT / "models" / "preview_biped.xml"}
 LOG_DIR = Path(os.environ.get("MONITOR_LOG_DIR", ROOT / "logs"))  # override for test runs
 
 SG90_TORQUE = 0.18          # N·m, stall torque of the SG90 (also the model's forcerange)
@@ -53,7 +54,8 @@ SOFT_MARGIN = 1e-3           # rad from the ctrlrange counts as "at the software
 
 
 # Crouch rule: target of each joint type = coefficient × A
-CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0}
+CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0,
+          "shoulder_pitch": 0.0, "shoulder_roll": 0.0, "elbow": 0.0, "wrist": 0.0}   # arms stay put while crouching
 
 
 def joint_type(actuator_name: str) -> str:
