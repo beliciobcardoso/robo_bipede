@@ -79,11 +79,13 @@ Peças compradas têm modelo de referência por script.
 **Regra de projeto:** o esqueleto inteiro já nasce com os **pontos de encaixe das capas**
 (seção 3.1). Cada peça estrutural abaixo só está pronta quando tiver os encaixes dela.
 
+- [x] Faixas de cada junta com batente mecânico + limite de software 5° antes (provisório, em `docs/arquitetura_perna.md`) **(juntos)**
+- [ ] Validar as faixas das juntas na passada simulada (F5) e ajustar **(juntos)**
 - [ ] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2, **com o espaço reservado para as capas em volta de cada segmento** **(juntos)**
 - [ ] Padrão de encaixe das capas — definir **antes** do suporte (ver 3.1) **(juntos)**
 - [ ] Tutorial do suporte do servo + rolamento **(Claude)**
-- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa** **(você)**
-- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **encaixes da capa** **(Claude)**
+- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa e os batentes da junta** **(você)**
+- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **batentes da junta**, **encaixes da capa** **(Claude)**
 - [ ] Coxa (quadril → joelho), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Canela (joelho → tornozelo), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Bloco do tornozelo: pitch + roll cruzados, com encaixes da capa **(você)**
@@ -127,7 +129,8 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 ## 6. Firmware (ESP32)
 
 - [ ] PWM dos 8 servos pelo LEDC **(juntos)**
-- [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória **(juntos)**
+- [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
+- [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**
 - [ ] Leitura do MPU-6050 + filtro (da F6) **(juntos)**
 - [ ] Postura em pé estável **(juntos)**
 - [ ] Passada no robô real (da F5/F8) **(juntos)**

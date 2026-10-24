@@ -5,3 +5,6 @@ __pycache__/
 
 # Local Python env for analysis tools (tools/)
 .venv/
+
+.serena/
+sim/logs/

@@ -10,9 +10,13 @@ Learning-focused 8-DOF biped robot: SG90-clone servos, ESP32, MPU-6050 for balan
 
 **Snap-fit covers:** the whole skeleton gets printed protective covers that clip on (no glue), enclosing servos, circuits and wires. Every structural part must be designed with the shared cover-mount interface from the start, leave envelope for the cover around each segment, keep access to ESP32 USB / power switch / battery charging / servo swap, and not limit joint range. Cover mass counts in torque budgets (sim F2/F4). Items in `docs/backlog.md` §3.1.
 
+**Joint limits:** every joint has a mechanical stop printed in the part and a software limit 5° inside it (firmware and sim `ctrlrange`); the servo must never be commanded into a stop. Ranges in `docs/arquitetura_perna.md` (provisional until sim F5).
+
 **Progress tracking:** `docs/backlog.md` is the single checklist of the project (who does each item: user / Claude / together). Tick items there when work lands, and add new ones there rather than in other docs.
 
 **Simulation roadmap:** `docs/simulacao.md` (phases F0–F8). Stack: MuJoCo (CPU, viewer) + MJX/JAX and CuPy on the local RTX 3060 12 GB, all in the repo `.venv`. Policy: use existing open-source first, measure against the real robot, write our own algorithm only where nothing models it (SG90-clone servo model, CAD→MJCF bridge, gait generator, IMU filter, design sweeps) — never a physics engine. Each phase starts only when the mechanical design needs it.
+
+**`sim/logs/` holds recordings of the user's monitor sessions: never delete them** (no wildcard `rm`); test runs by Claude go to `MONITOR_LOG_DIR` elsewhere, e.g. the scratchpad.
 
 **`cad/manual/` is the user's hand-made work: read-only for Claude.** Never write, save, move, rename, delete or regenerate anything there (no `doc.save()` after opening, no `git checkout`/`clean`/`reset` that touches it). Analyse by opening with FreeCADCmd and only reading. The SG90 servo there (`cad/manual/servo_sg90.FCStd`) holds the authoritative re-measured dimensions; `cad/parts/servo_sg90.py` mirrors them for brackets to import.
 
@@ -33,6 +37,8 @@ Python environment (analysis + simulation, pinned): `uv venv .venv && uv pip ins
 
 ```bash
 .venv/bin/python sim/tools/smoke_test.py   # MuJoCo CPU vs MJX GPU (JAX and Warp backends); must print SMOKE TEST PASSED
+.venv/bin/python sim/tools/monitor.py      # viewer + exact crouch keys + live torque; logs every run to sim/logs/*.csv (read these to see what the user did)
+.venv/bin/python sim/tools/monitor.py --sweep   # headless: every crouch depth -> knee torque, falls, joint-stop hits
 ```
 
 Simulation gotchas (measured on this machine, F0):
