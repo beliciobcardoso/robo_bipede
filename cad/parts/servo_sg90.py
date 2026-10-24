@@ -9,8 +9,10 @@ Coordinate system (shared by every part that mounts this servo):
     +X      = along the body length, from the shaft end towards the far end
     Y       = across the body width (symmetric)
 
-All dimensions in mm, measured with a caliper on the servo in hand
-(see docs/medidas_servo_sg90.md). Values marked "nominal" were not measured.
+All dimensions in mm, re-measured on 2026-10-24 with a better caliper and taken
+from the hand-made model cad/manual/servo_sg90.FCStd (see docs/medidas_servo_sg90.md).
+Values marked "nominal" were not measured. Edge fillets of the real case are
+not modelled: brackets use square pockets anyway.
 """
 
 import os
@@ -28,30 +30,30 @@ DOC_NAME = "servo_sg90"
 @dataclass(frozen=True)
 class ServoDims:
     # Main case
-    body_l: float = 23.1
-    body_w: float = 12.2
-    body_h: float = 24.2          # bottom to top face of the case (no gear tower)
+    body_l: float = 23.0
+    body_w: float = 12.0
+    body_h: float = 24.0          # bottom to top face of the case (no gear tower)
 
     # Mounting tabs (one centred hole per tab)
-    tab_l_total: float = 32.5     # tip to tip
+    tab_l_total: float = 33.0     # tip to tip
     tab_t: float = 2.5
     tab_bottom_z: float = 17.0    # case bottom to tab underside
-    hole_spacing: float = 27.8    # center to center
+    hole_spacing: float = 28.0    # center to center
     hole_d: float = 2.0           # M2 self-tapping screw
 
     # Gear tower (top of case), flush with the shaft-side wall
     tower_d: float = 12.0
     tower_h: float = 4.0
-    bump_d: float = 5.0           # secondary gear bump next to the tower (nominal)
-    bump_x: float = 5.6           # shaft axis to bump axis (nominal)
-    bump_h: float = 3.5           # nominal
+    bump_d: float = 5.5           # secondary gear bump next to the tower
+    bump_x: float = 7.0           # shaft axis to bump axis
+    bump_h: float = 4.0           # same top as the tower
 
     # Output shaft (spline modelled as plain cylinder over the teeth)
     shaft_d: float = 5.0
     shaft_h: float = 3.0          # above tower top
     spline_teeth: int = 21
-    shaft_screw_d: float = 1.6    # nominal
-    shaft_screw_depth: float = 3.0  # nominal
+    shaft_screw_d: float = 2.0
+    shaft_screw_depth: float = 3.0
 
     # Cable exit: stub on the shaft-side end face
     cable_w: float = 4.0

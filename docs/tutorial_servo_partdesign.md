@@ -125,7 +125,7 @@ Dentro dele, uma pasta **Origin**.
 
 ### 3.1 Abrir o sketch
 
-1. Menu **Part Design → New Sketch**.
+1. Menu **Sketch → New Sketch**.
 2. Na aba **Tasks** aparece uma lista de planos. Clique em **XY_Plane** → **OK**.
 
 **Você deve ver**: uma grade, o **eixo vermelho** (horizontal, X) e o **eixo verde** (vertical, Y)
@@ -133,7 +133,7 @@ cruzando no meio. O cruzamento é a **origem**.
 
 ### 3.2 Desenhar o retângulo
 
-1. Menu **Sketch → Sketcher geometries → Rectangle** (ou o ícone de retângulo na barra).
+1. Menu **Sketch → Geometries → Rectangle** (ou o ícone de retângulo na barra).
 2. Clique **uma vez** abaixo e à esquerda da origem (canto de baixo-esquerda).
 3. Clique **uma vez** acima e bem à direita da origem (canto de cima-direita).
    A origem deve ficar **dentro** do retângulo, **perto do lado esquerdo** — igual ao desenho da
@@ -148,7 +148,14 @@ Se aparecerem caixinhas com números enquanto desenha, ignore — só clique.
 ### 3.3 Dar as medidas
 
 Cada medida: **selecione** o que diz a tabela → clique na **ferramenta** → digite o **valor** → **OK**.
-As ferramentas estão no menu **Sketch → Sketcher constraints** (ou nos ícones de cota da barra).
+As ferramentas estão no menu **Sketch → Constraints**.
+
+> **Atenção 1 — use a ferramenta certa.** No menu existem **Dimension** (genérica) e
+> **Horizontal Dimension** / **Vertical Dimension**. Use **sempre** a Horizontal ou a Vertical.
+> A genérica "adivinha" o tipo de medida e é fácil ela criar uma cota errada ou repetida.
+> Se a barra de status embaixo mostrar *"M switch mode"*, você está na genérica: aperte **Esc**.
+>
+> **Atenção 2 — vírgula.** Digite os valores com **vírgula**: `23,1`, não `23.1`.
 
 | # | Selecione | Ferramenta | Valor |
 |---|-----------|------------|-------|
@@ -174,12 +181,16 @@ Na aba **Tasks**, clique em **Close** (no topo do painel).
 ### 3.5 Transformar em sólido (Pad)
 
 1. Na aba **Model**, clique no sketch que você acabou de criar (**Sketch**).
-2. Menu **Part Design → Pad**.
-3. Na aba **Tasks**:
-   - **Type**: troque de *Dimension* para **Two dimensions**.
-   - **Length**: `7,2` (quanto sobe acima da origem)
-   - **2nd length**: `17,0` (quanto desce abaixo da origem)
+2. Menu **Part Design → Additive Features → Pad**.
+3. Na aba **Tasks**, em **Pad Parameters**:
+   - **Mode**: troque de *One sided* para **Two sided**. Aparecem dois blocos: **Side 1** e **Side 2**.
+   - **Side 1** → **Type**: *Dimension* → **Length**: `7,2` (quanto sobe acima da origem)
+   - **Side 2** → **Type**: *Dimension* → **Length**: `17,0` (quanto desce abaixo da origem)
+   - **Reversed**: deixe **desmarcado**.
 4. **OK**.
+
+Se a caixa ficar com a parte grande **para cima**, os lados trocaram: dê duplo clique no **Pad**
+na árvore e inverta os valores (Side 1 = `17,0`, Side 2 = `7,2`) — ou marque **Reversed**.
 
 **Você deve ver**: uma caixa. Aperte **0** (zero) no teclado para a vista em perspectiva.
 A maior parte da caixa fica **abaixo** do plano da origem.
@@ -203,14 +214,14 @@ Vista de cima, cotas medidas a partir da origem:
 
 ### 4.1 Abrir o sketch
 
-**Part Design → New Sketch** → **XY_Plane** → **OK**.
+**Sketch → New Sketch** → **XY_Plane** → **OK**.
 (O corpo some de vista? Normal: o FreeCAD esconde o sólido enquanto edita. Pode continuar.)
 
 ### 4.2 Desenhar
 
 1. **Rectangle**: um retângulo **maior** que o do corpo, com a origem dentro, um pouco à esquerda
    do meio. Cantos fora dos eixos, como antes. **Esc**.
-2. Menu **Sketch → Sketcher geometries → Circle From Center** (ícone de círculo).
+2. Menu **Sketch → Geometries → Circle From Center** (ícone de círculo).
 3. Clique **em cima do eixo vermelho**, perto da ponta esquerda do retângulo (centro do círculo),
    depois clique um pouco ao lado (tamanho do círculo).
 4. Repita perto da ponta direita, também **em cima do eixo vermelho**. **Esc**.
@@ -242,8 +253,9 @@ furos a 27,8 um do outro, também centrados no corpo → 8,35 à esquerda e 19,4
 ### 4.4 Pad
 
 1. Selecione o novo sketch na árvore (**Sketch001**).
-2. **Part Design → Pad**.
-3. **Type**: **Dimension**. **Length**: `2,5`. **OK**.
+2. **Part Design → Additive Features → Pad**.
+3. **Mode**: **One sided** (o padrão). **Type**: **Dimension**. **Length**: `2,5`. **OK**.
+   Daqui em diante todos os Pads são *One sided*.
 
 **Você deve ver**: uma placa fina atravessando o corpo, sobrando dos dois lados, com um furo em
 cada ponta.
@@ -339,6 +351,9 @@ O cilindrinho ao lado da torre. Mesma ideia do passo 5:
 | Botão cinza, não clica | Nada selecionado, ou seleção errada | Confira a coluna "Selecione" da tabela |
 | Desenho não fica verde | Falta medida | Compare com a tabela, linha por linha |
 | Algo fica vermelho | Medida conflitante ou repetida | Ctrl+Z e refaça só a última |
+| Painel mostra **Redundant constraints: (N)** | Há medidas repetidas (geralmente da ferramenta *Dimension* genérica) | Clique no número azul **(N)** para selecioná-las e aperte **Delete**. Se ficar confuso: **Close**, apague o sketch na árvore e refaça o passo |
+| Mensagem **"Datum … is invalid"** | O FreeCAD recusou a medida porque o sketch já tem medidas repetidas ou conflitantes | Resolva o *Redundant constraints* primeiro; depois dê a medida de novo |
+| A origem ficou **fora** do retângulo | Retângulo desenhado no lugar errado | As medidas vertex → origem vão empurrar tudo; é mais fácil apagar o sketch e desenhar de novo com a origem **dentro**, perto do lado esquerdo |
 | A cota foi para o lugar errado | Pegou a linha em vez do vértice | Ctrl+Z, passe o mouse até **só a bolinha** ficar amarela |
 | Pad cresceu para o lado errado | Direção | Marque/desmarque **Reversed** |
 | Sumiu a árvore ou o painel | Painel fechado | **View → Panels → Combo View** |

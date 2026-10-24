@@ -2,3 +2,6 @@
 cad/build/
 *.FCBak
 __pycache__/
+
+# Local Python env for analysis tools (tools/)
+.venv/
