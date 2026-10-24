@@ -42,12 +42,14 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
 - **F0 — Ambiente**
   - [x] Instalar MuJoCo + JAX com CUDA no `.venv` — versões fixadas em `requirements.txt` **(Claude)**
   - [x] Teste de fumaça: simulação rodando na RTX 3060 — `sim/tools/smoke_test.py`, motor Warp 4,7 M passos/s **(Claude)**
-  - [ ] Fazer o [tutorial do MuJoCo](tutorial_mujoco.md): abrir, mexer as juntas, ler o torque, experimento de agachar **(você)**
+  - [x] Fazer o [tutorial do MuJoCo](tutorial_mujoco.md): abrir, mexer as juntas, ler o torque, experimento de agachar **(você)**
 - **F1 — Robô completo de caixinhas**
   - [x] Modelo MuJoCo do bípede (2 pernas × 4 juntas, 359 g) gerado por `sim/tools/build_biped.py` **(Claude)**
   - [x] Medir torques: agachar, levantar em várias velocidades, ficar numa perna (`sim/tools/f1_experiments.py`) **(Claude)**
-  - [ ] Abrir o robô completo no monitor (Passo 8 do tutorial do MuJoCo) **(você)**
-  - [ ] Decidir depois da F2: manter 8 DOF (corpo inclina ~18° para apoiar numa perna) ou acrescentar quadril roll **(juntos)**
+  - [x] Abrir o robô completo no monitor (Passo 8 do tutorial do MuJoCo) **(você)**
+  - [x] Decidir entre manter 8 DOF ou acrescentar quadril roll — **decidido em 24/10: manter 8 DOF** (corpo inclina ~18° para apoiar numa perna; ver `arquitetura_perna.md`) **(você)**
+  - [x] Teste de balanço lateral em ritmo de passada (`sim/tools/rocking_test.py`): tornozelo roll 53 % a 0,5 passo/s, 61 % a 1 passo/s — passa até 1 passo/s **(Claude)**
+  - [ ] Rever a decisão dos 8 DOF se o tornozelo roll passar de ~70 % do SG90 no ritmo desejado, ou se a inclinação continuar acima de ~20° depois de afinar o quadril (F2) **(juntos)**
 - **F2 — Varredura na GPU**
   - [ ] Varrer coxa/canela × largura do quadril × agachamento × peso → torque necessário vs SG90 (parado **e** em movimento), **incluindo a massa estimada das capas** **(Claude)**
   - [ ] Escolher as medidas da perna com base no mapa **(juntos)**
@@ -92,6 +94,7 @@ Peças compradas têm modelo de referência por script.
 - [ ] Canela (joelho → tornozelo), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Bloco do tornozelo: pitch + roll cruzados, com encaixes da capa **(você)**
 - [ ] Pé com sola, com encaixes da capa **(você)**
+- [ ] Quadril modular: suporte do quadril com espaço reservado no tronco para um servo de quadril roll de cada lado, caso a decisão dos 8 DOF mude **(juntos)**
 - [ ] Quadril/tronco: ESP32, bateria, MPU-6050 no centro, placa de distribuição, **com encaixes da capa e acesso de manutenção** **(você)**
 - [ ] Montagem virtual: checar colisões e amplitude de cada junta — **com as capas montadas** **(juntos)**
 - [ ] Modelos de referência que faltam: parafusos/porcas M3, ESP32 DevKit, MPU-6050, bateria **(Claude)**
