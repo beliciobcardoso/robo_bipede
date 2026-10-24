@@ -4,7 +4,7 @@ Acompanhamento do robô bípede. Marque `[x]` ao concluir. Cada item diz **quem*
 **(você)**, **(Claude)** ou **(juntos)**. Itens dentro de uma seção estão na ordem sugerida.
 
 Documentos de apoio: [materiais](lista_materiais.md) · [medidas do servo](medidas_servo_sg90.md) ·
-[tutorial PartDesign](tutorial_servo_partdesign.md) · [plano de simulação](simulacao.md)
+[tutorial PartDesign](tutorial_servo_partdesign.md) · [tutorial MuJoCo](tutorial_mujoco.md) · [plano de simulação](simulacao.md)
 
 ---
 
@@ -42,6 +42,7 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
 - **F0 — Ambiente**
   - [x] Instalar MuJoCo + JAX com CUDA no `.venv` — versões fixadas em `requirements.txt` **(Claude)**
   - [x] Teste de fumaça: simulação rodando na RTX 3060 — `sim/tools/smoke_test.py`, motor Warp 4,7 M passos/s **(Claude)**
+  - [ ] Fazer o [tutorial do MuJoCo](tutorial_mujoco.md): abrir, mexer as juntas, ler o torque, experimento de agachar **(você)**
 - **F1 — Uma perna de caixinhas**
   - [ ] Modelo MuJoCo de 1 perna (4 juntas) com blocos e massas estimadas **(Claude)**
   - [ ] Abrir no visualizador, mexer as juntas e ler os torques **(você)**
@@ -78,11 +79,13 @@ Peças compradas têm modelo de referência por script.
 **Regra de projeto:** o esqueleto inteiro já nasce com os **pontos de encaixe das capas**
 (seção 3.1). Cada peça estrutural abaixo só está pronta quando tiver os encaixes dela.
 
+- [x] Faixas de cada junta com batente mecânico + limite de software 5° antes (provisório, em `docs/arquitetura_perna.md`) **(juntos)**
+- [ ] Validar as faixas das juntas na passada simulada (F5) e ajustar **(juntos)**
 - [ ] Documento da arquitetura da perna (`docs/arquitetura_perna.md`): medidas e esqueleto, a partir da F2, **com o espaço reservado para as capas em volta de cada segmento** **(juntos)**
 - [ ] Padrão de encaixe das capas — definir **antes** do suporte (ver 3.1) **(juntos)**
 - [ ] Tutorial do suporte do servo + rolamento **(Claude)**
-- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa** **(você)**
-- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **encaixes da capa** **(Claude)**
+- [ ] Suporte do servo + rolamento 623ZZ — peça base que se repete nas juntas, **com os encaixes da capa e os batentes da junta** **(você)**
+- [ ] Revisão do suporte: encaixe do servo, passagem do cabo pelo canal de baixo, alinhamento do rolamento, **batentes da junta**, **encaixes da capa** **(Claude)**
 - [ ] Coxa (quadril → joelho), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Canela (joelho → tornozelo), com encaixes da capa e caminho dos fios **(você)**
 - [ ] Bloco do tornozelo: pitch + roll cruzados, com encaixes da capa **(você)**
@@ -126,7 +129,8 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 ## 6. Firmware (ESP32)
 
 - [ ] PWM dos 8 servos pelo LEDC **(juntos)**
-- [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória **(juntos)**
+- [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
+- [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**
 - [ ] Leitura do MPU-6050 + filtro (da F6) **(juntos)**
 - [ ] Postura em pé estável **(juntos)**
 - [ ] Passada no robô real (da F5/F8) **(juntos)**
