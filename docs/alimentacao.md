@@ -6,9 +6,10 @@ modelo de 620 g (tronco 76 × 78 × 68 mm). Para refazer: `.venv/bin/python sim/
 ## Decisão (25/10/2026, você)
 
 - **Trilho dos servos:** ~~Pololu D24V150F5 (5 V, 15 A)~~ → **UBEC genérico 5 V / 7 A** (entrada 5,5–26 V, 16 g, R$ 59), trocado no mesmo dia por custo. A margem é curta: 7 A contra ~6 A numa queda ou trava; depende do ligar escalonado e não aguenta 2 servos travados por muito tempo além disso. Fusível de 7,5 A continua (~5,8 A da bateria a 7 A).
-- **Lógica:** ESP32, lógica do PCA9685, MPU-6050 e HC-SR04 num regulador separado, o Pololu D24V10F5
-  (5 V, 1 A), direto da bateria e com terra comum. Esse regulador não tem proteção contra inversão:
-  fica depois da chave e do conector polarizado.
+- **Lógica:** ESP32, lógica do PCA9685, MPU-6050 e HC-SR04 num regulador separado, direto da bateria e
+  com terra comum: ~~Pololu D24V10F5~~ → **módulo MP1584EN** (3 A, ajustável; comprado em 25/10, kit de 5).
+  Ajustar para 5,0 V com o multímetro antes de ligar o ESP32 e travar o trimpot (cola ou esmalte), porque a
+  vibração mexe nele. Não tem proteção contra inversão: fica depois da chave e do conector polarizado.
 - **Fusível:** 7,5 A de ação retardada.
 - **Firmware:** liga os servos em grupos (item na §6 do backlog).
 - **Massas:** nenhum dos dois reguladores tem massa no site da Pololu. No modelo (`body.TORSO_PARTS`)
