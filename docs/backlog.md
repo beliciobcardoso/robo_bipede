@@ -75,6 +75,8 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [x] Decidir entre manter 8 DOF ou acrescentar quadril roll — **decidido em 24/10: manter 8 DOF** (corpo inclina ~18° para apoiar numa perna; ver `arquitetura_perna.md`) **(você)**
   - [x] Teste de balanço lateral em ritmo de passada (`sim/tools/rocking_test.py`): tornozelo roll 53 % a 0,5 passo/s, 61 % a 1 passo/s — passa até 1 passo/s **(Claude)**
   - [ ] Rever a decisão dos 8 DOF se o tornozelo roll passar de ~70 % do SG90 no ritmo desejado, ou se a inclinação continuar acima de ~20° depois de afinar o quadril (F2) **(juntos)**
+    Decidido em 25/10 (você): vale no ritmo de projeto, 0,67 passo/s. Com o robô de 615 g não dispara (roll 56 %, inclinação 14°): mantém 8 DOF.
+  - [ ] Margem do joelho: 79 % ao levantar a 1 rad/s e no balanço (limite 70 %) — o quadril roll não ajuda o joelho; atacar com agachamento base menor, massa ou ritmo de levantar **(juntos)**
 - **F2 — Varredura na GPU**
   - [x] Varrer coxa/canela × largura do quadril × peso das capas → torque vs SG90, parado e em movimento — 360 robôs em `sim/tools/f2_sweep.py` **(Claude)**
   - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`); revistas pelo conceito do suporte para quadris 50 mm e pé 45 × 70 **(juntos)**
@@ -143,7 +145,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 - [x] Definir as dimensões do clipe e do pino-guia — **aprovadas em 24/10** ([capas.md](capas.md)) **(juntos)**
 - [ ] Confirmar parede da capa (0,8 mm desde 25/10; resiste a queda? testar na peça de tolerância) e encaixes por capa (2 clipes + 2 pinos; tronco 4 + 2) ao desenhar as capas **(juntos)**
 - [x] Modelo de referência do encaixe padrão: `cad/parts/snap_clip.py` (capa) e `snap_socket.py` (esqueleto), com checagem do encaixe montado **(Claude)**
-- [ ] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)**
+- [x] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)** — 25/10: calculado pela forma no `body.py` (133 g com parede de 0,8 mm) e já nas simulações; conferir na balança na F4
 - [ ] Gaveta da bateria pela traseira do quadril, com tampa de encaixe própria: troca em ~10 s sem abrir o quadril; plug de balanceamento (JST-XH) acessível para carregar sem tirar a bateria — decidido em 25/10 **(você)**
 - [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga e troca da bateria (gaveta traseira do quadril), troca de servo, calibração **(juntos)**
 - [ ] Caminho dos fios por dentro das capas sem prender as juntas em nenhuma posição **(juntos)**
