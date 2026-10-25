@@ -45,8 +45,7 @@ depois espera por elas. Ao terminar, os itens que sobrarem viram linhas no [back
 - [x] Decidir o regulador e o fusível que acompanha — 25/10: D24V150F5 nos servos, D24V10F5 na lógica, fusível 7,5 A retardado **(você)**
 - [x] Registrar a decisão com o motivo: `lista_materiais.md`, `body.py` (`TORSO_PARTS["regulador"]`:
       medidas, massa, fonte) e backlog §1 **(Claude)**
-- [ ] Confirmar na bancada da F3 a corrente real de stall do clone. Se passar da margem, voltar a esta
-      seção **(você)**
+- [x] ~~Confirmar na bancada da F3 a corrente real de stall do clone~~ → movido para o backlog (F3), depende de hardware **(você)**
 
 ### 0.2 Tronco em V suave (silhueta masculina)
 
@@ -54,7 +53,7 @@ depois espera por elas. Ao terminar, os itens que sobrarem viram linhas no [back
       (`docs/img/silhueta01–06.png`, medidas em 25/10; ver abaixo) **(Claude)**
 
 **Métrica (25/10).** Vista de frente, robô de pé, com as capas. Medida por renderização de
-segmentação, quase ortográfica (o script vai para `sim/tools/` na etapa das variantes). Larguras:
+segmentação, quase ortográfica; nas variantes, calculada direto das formas das capas (`body.shells`). Larguras:
 
 - **ombros:** largura externa total na altura dos ombros (ombreiras e braços);
 - **peito:** capa do tronco na altura das axilas, sem os braços;
@@ -82,11 +81,11 @@ não vai para o repositório porque as referências têm marca d'água).
 
 Todas as referências são de frente: o perfil lateral (peito ÷ barriga) não tem referência e fica a
 critério visual.
-- [ ] Gerar 3 ou 4 variantes renderizadas de frente e de lado, centradas em afinar a cintura (M1 ≥ 1,5):
+- [x] Gerar 3 ou 4 variantes renderizadas de frente e de lado — 25/10, com o tronco novo (só o ESP32 dentro). O ESP32 só cabe com cintura fina se o peito alargar (base 62, ombros 96) e o tronco tiver ≥ 50 mm; variantes A (hoje), B (V, 50 mm), C (V, 55 mm), D (V, 65 mm). Pedido original:
       cintura fina com o tronco mais fundo ou mais alto, e peito um pouco mais largo com cintura média. Para cada uma: se a eletrônica cabe
       (`torso_layout.py --search`), massa, picos do `rocking_test` e folga do braço até a perna **(Claude)**
-- [ ] Escolher a variante **(você)**
-- [ ] Aplicar em `BipedParams`. Se a escolhida afinar a profundidade de cima para baixo, isso precisa
+- [x] Escolher a variante — 25/10: **B** (V, tronco 50 mm) **(você)**
+- [x] Aplicar em `BipedParams` — feito em 25/10 (tronco 50 × 62 × 50, ombros 96; ESP32 recolocado no `TORSO_LAYOUT`). Se a escolhida afinar a profundidade de cima para baixo, isso precisa
       de um parâmetro novo no `body.py` (hoje só a largura afina) **(Claude)**
 
 Limites que as variantes têm de respeitar:
@@ -99,7 +98,7 @@ Limites que as variantes têm de respeitar:
 
 ### 0.3 Posição da bateria
 
-- [ ] ~~Tronco~~ Quadril: escrever a preferência da bateria em `score()` (a bateria foi para o quadril em 25/10; vale para o layout do quadril) (`sim/tools/torso_layout.py`, `TODO(human)`),
+- [x] ~~Tronco~~ Quadril: escrever a preferência da bateria em `score()` — 25/10: atrás e embaixo (`2·x + z`), pela gaveta traseira que você decidiu; o layout do quadril já usa (a bateria foi para o quadril em 25/10; vale para o layout do quadril) (`sim/tools/torso_layout.py`, `TODO(human)`),
       já com as medidas da 0.2 **(você)**. Trade-offs:
       - **Bateria baixa:** centro de massa mais baixo, menos torque no tornozelo roll e no joelho ao
         inclinar. Em compensação o pêndulo fica mais rápido, e o acesso ao conector de carga é pior.
@@ -122,30 +121,33 @@ Limites que as variantes têm de respeitar:
 
 ## Fase 2 — Re-simular e registrar
 
-- [ ] Rodar de novo `build_biped.py`, `f1_experiments.py`, `rocking_test.py` e `f2_sweep.py --quick`
+- [x] Rodar de novo `build_biped.py`, `f1_experiments.py`, `rocking_test.py` e `f2_sweep.py --quick` — 25/10; `--tilt` padrão passou a 9° (12° derruba o robô de 615 g)
       com o tronco final, e conferir que o `f1_biped.xml` regenerado é o que vai no commit **(Claude)**
-- [ ] Registrar os números novos (massa, picos, inclinação) em `simulacao.md` e
+- [x] Registrar os números novos (massa, picos, inclinação) em `simulacao.md` e
       `arquitetura_corpo.md`, com a comparação antes/depois **(Claude)**
 - [ ] Rever o gatilho dos 8 DOF com os números novos: a inclinação a 1 passo/s passou de 20°, mas o
       ritmo de projeto é ~0,67 passo/s. Decidir se o gatilho vale para o ritmo de projeto ou para
       1 passo/s, e escrever isso no backlog **(juntos)**
+      Recomendação (25/10): o gatilho vale no ritmo de projeto (0,67 passo/s). Lá a inclinação é 14° e o
+      tornozelo roll 56 %, então não dispara; o limite agora é o joelho (79 %), não o roll.
 
 ## Fase 3 — Prévia e documentos
 
-- [ ] `make preview`, linha nova no histórico de `previa.md` e imagem commitada **(Claude)**
-- [ ] Sincronizar os números defasados **(Claude)**:
+- [x] `make preview`, linha nova no histórico de `previa.md` e imagem — 25/10 **(Claude)**
+- [x] Sincronizar os números defasados (25/10) **(Claude)**:
       - "569 g": `CLAUDE.md`, `lista_materiais.md`, `arquitetura_perna.md`, `tutorial_mujoco.md`
-      - "12 juntas" no backlog (são 16)
-      - "quadris 45 mm, pé 40 × 70" em `backlog.md` (F2) e `simulacao.md` (agora 50 mm e 45 × 70,
-        revistos pelo conceito do suporte)
-      - "UBEC" em `arquitetura_corpo.md`, no backlog (§1 e §5) e no `CLAUDE.md`, conforme a decisão 0.1
+      - ~~"12 juntas" no backlog~~ (feito em 25/10)
+      - ~~"quadris 45 mm, pé 40 × 70" em `backlog.md` e `simulacao.md`~~ (feito em 25/10)
+      - ~~"UBEC" em `arquitetura_corpo.md`, backlog e `CLAUDE.md`~~ (feito com a decisão 0.1)
       - tamanho do tronco e V no `CLAUDE.md` e em `arquitetura_corpo.md`
 - [ ] Backlog §3.1 "Orçamento de massa das capas": decidir se o cálculo pela forma (`body.py`) fecha o
       item ou se ele só fecha na F4, com a massa das peças reais **(juntos)**
+      Recomendação (25/10): o orçamento pela forma (133 g com 0,8 mm) vale como orçamento; o item fecha na F4,
+      conferindo na balança.
 
 ## Fase 4 — Entrega
 
-- [ ] Revisão do diff inteiro (código + docs) **(Claude)**
+- [x] Revisão do diff inteiro (código + docs) — 25/10 **(Claude)**
 - [ ] Commit e PR do branch `feat/torso-packaging`, depois do seu OK **(Claude)**
 
 ## Em paralelo — caminho crítico da mecânica (não depende deste plano)

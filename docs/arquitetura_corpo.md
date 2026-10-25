@@ -130,3 +130,22 @@ Com as capas mais justas, o garfo do ombro pitch encosta 1,7 mm para fora da cap
 junta (fica à mostra como as outras juntas).
 
 **Ritmo com SG90 em tudo: até ~0,67 passo/s; levantar a ≤ 0,7 rad/s.** 1 passo/s reprova no tornozelo roll.
+
+## Quadril, cintura e tronco em V (25/10)
+
+Decisões do dia (você):
+- **Rotação da cintura:** o tronco gira ±45° sobre o quadril. É o 17º SG90, preso no quadril em cima dos dois do quadril pitch.
+- **Divisão da eletrônica:** no quadril, bateria (com gaveta pela traseira), reguladores, MPU e o PCA9685 das pernas. No tronco, o ESP32, que gera o PWM dos braços. Pela cintura passam só 5 fios.
+- **Capas de 0,8 mm.**
+- **Tronco em V (variante B).**
+
+| | Antes (manhã) | Agora |
+|---|---|---|
+| Servos | 16 | 17 |
+| Massa / altura | 620 g / 254 mm | **615 g / 288 mm** |
+| Tronco | 76 × 78 × 68 mm, ombros 86 | 50 × 62 × 50 mm, ombros 96 (V 1,52) |
+| Quadril | dentro do tronco | 76 × 92 × 52 mm (o menor em que tudo cabe) |
+| Numa perna / levantar 1 rad/s (joelho) | — / 72 % | 66 % / 79 % |
+
+As variantes do V e os números estão em [plano_correcoes_tronco.md](plano_correcoes_tronco.md) (0.2) e em [simulacao.md](simulacao.md).
+

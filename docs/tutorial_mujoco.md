@@ -201,7 +201,7 @@ Painel da esquerda → **Rendering** → ligue **Contact Point** e **Contact For
 ## Passo 8 — O robô completo (F1)
 
 Até aqui foi um robô de mentira, com uma perna só. Agora o modelo é o **robô inteiro**, ainda
-feito de caixinhas, mas com as massas estimadas das peças de verdade (**569 g** no total):
+feito de caixinhas, mas com as massas estimadas das peças de verdade (**615 g** no total; eram 569 g quando o tutorial foi escrito):
 
 - **caixa laranja** = tronco (bateria, ESP32, MPU-6050, regulador e capa);
 - **caixinhas azuis** = os 16 servos SG90 (8 nas pernas, 8 nos braços), cada um no lugar onde vai ficar;

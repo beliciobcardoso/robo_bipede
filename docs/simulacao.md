@@ -100,7 +100,7 @@ Conclusões:
 - **As capas pesam na conta:** com capas pesadas (100 g em vez de 50 g, 409 g no total) nenhuma
   combinação a 45 mm passa a 1 passo/s (74–77 %); todas continuam passando a 0,5 passo/s.
 - **Medidas aprovadas (24/10):** quadris 45 mm, coxa = canela = 45 mm, pé 40 × 70 mm, capas
-  com meta de 35 g e limite de 50 g.
+  com meta de 35 g e limite de 50 g. Revistas pelo conceito do suporte: quadris 50 mm, pé 45 × 70 mm.
 - **Revisão no conceito do suporte (24/10):** com as peças reais a perna tem ~42 mm de largura,
   então os quadris foram para **50 mm** (pé 45 mm) e o tornozelo pitch→roll de 12 para **22 mm**.
   A estimativa física conservadora da tabela acima marca 50 mm como reprovado a 1 passo/s (71–80 %),
@@ -116,6 +116,13 @@ Conclusões:
   levantar a 1 rad/s com joelho a 67 %. Ritmo com folga até ~0,7 passo/s.
 - **Braços com cotovelo e punho (24/10):** 16 servos, 573 g (569 g com as capas quase retas, mesmos picos). A roll ±12°: tornozelo roll 68 / 64 / 87 % e
   joelho 50 / 46 / 71 % a 0,5 / 0,67 / 1 passo/s; levantar a 1 rad/s com joelho a 72 %. Ritmo até ~0,67 passo/s.
+- **Quadril, cintura e V (25/10):** 17 servos (cintura gira o tronco ±45°), eletrônica no quadril, ESP32
+  no tronco, capas de 0,8 mm, tronco em V (variante B): **615 g, 288 mm**. O balanço sem controle só
+  transfere o peso com roll ±9° (±12° derruba o robô mais alto): tornozelo roll 49 / 56 / 60 %, joelho
+  **78 / 79 / 73 %**, inclinação 13–15°, pé sobe 11–15 mm a 0,5 / 0,67 / 1 passo/s. Numa perna: só a −10°
+  (joelho 66 %). Levantar a 1 rad/s: joelho 79 %. O joelho passou a ser o limite; a estimativa física
+  da troca de pé (F2) dá 110 % a 0,67 passo/s — conservadora, o número real vem com o controle da F6.
+  Corrente do trilho: pico 1,6–2,1 A no balanço a 0,67 passo/s.
 
  usar o que existe, medir, só então criar
 

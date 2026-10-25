@@ -121,7 +121,7 @@ BODY_PARTS = {
 WIRING_G = {"torso": 3.0, "pelvis": 6.0}   # power leads, I2C, signals (servo cables count with the servos)
 # name -> (centre xyz mm in the torso frame, rotation: rows = torso axes, columns = part length/width/thickness)
 TORSO_LAYOUT = {                 # torso_layout.py --search, 2026-10-25
-    "controle": ((-5.0, 9.0, -10.5), ((0, 1, 0), (1, 0, 0), (0, 0, -1))),
+    "controle": ((-6.0, -6.0, -4.0), ((0, 1, 0), (-1, 0, 0), (0, 0, 1))),
 }
 PELVIS_LAYOUT = {                # torso_layout.py --seat pelvis --search, 2026-10-25
     "pca9685": ((-30.0, -13.0, 11.0), ((0, 0, 1), (-1, 0, 0), (0, -1, 0))),
@@ -166,10 +166,11 @@ class BipedParams:
     # 86 mm at the shoulders, big head -> head / torso / legs = 20 / 31 / 50 % of 254 mm
     # 2026-10-25: 76 deep and 78 at the hips (was 50 x 70) so the electronics fit between the 4 torso
     # servos (sim/tools/torso_layout.py); a mild V from the shoulders down, chosen by the user
-    # 2026-10-25: 50 x 78 x 45 once the electronics went to the pelvis (only the ESP32 and the shoulder
-    # servos stay); the V shape is still open (docs/plano_correcoes_tronco.md 0.2)
-    torso_size_mm: tuple = (50.0, 78.0, 45.0)
-    torso_top_width_mm: float = 86.0  # frame width at the shoulders
+    # 2026-10-25 (user, variant B): V torso — 62 at the waist, 96 at the shoulders, 50 tall: cover chest
+    # / waist = 1.52 (the user's reference silhouettes: 1.5-2.1); only the ESP32 and the shoulder servos
+    # ride inside (the electronics went to the pelvis); 50 tall is the least where the ESP32 fits
+    torso_size_mm: tuple = (50.0, 62.0, 50.0)
+    torso_top_width_mm: float = 96.0  # frame width at the shoulders
     shoulder_pitch_body: str = "front"  # shoulder pitch servo body lies "back" / "front" / "down" from its shaft
     torso_struct_g_per_cm2: float = 25.0 / 178.0   # frame plates: 25 g on a 50 x 70 x 45 mm frame (scaled by area)
 

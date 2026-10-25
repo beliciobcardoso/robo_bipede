@@ -2,8 +2,8 @@
 
 Marque `[x]` no que já tem. Itens **(opcional)** não bloqueiam o projeto.
 
-Massa total: **569 g** (proporção estilo Alpha, 254 mm de altura, 16 servos, capas quase retas de 175 g
-calculadas pela forma — 24/10). **SG90 em todas as juntas** (decisão de
+Massa total: **615 g** (288 mm de altura, 17 servos com a cintura, capas de 0,8 mm de 133 g calculadas
+pela forma, tronco em V — 25/10). **SG90 em todas as juntas** (decisão de
 24/10): joelho e tornozelo roll ficam no limite a 1 passo/s e com folga a 0,5 passo/s — ver
 [arquitetura_corpo.md](arquitetura_corpo.md).
 

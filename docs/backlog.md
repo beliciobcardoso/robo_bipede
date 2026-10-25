@@ -25,7 +25,7 @@ Documentos de apoio: [corpo inteiro](arquitetura_corpo.md) · [prévia 3D](previ
 
 ## Decisão agora
 
-- [x] Servos: **SG90 em todas as 12 juntas** — decidido em 24/10 **(você)**
+- [x] Servos: **SG90 em todas as juntas** — decidido em 24/10 (hoje 17: 8 nas pernas, 8 nos braços, 1 na cintura) **(você)**
 - [x] Proporção do corpo: tronco 68 mm, ombros 86 mm, cabeça grande, parede 1,2 mm — decidido em 24/10 ([arquitetura_corpo.md](arquitetura_corpo.md)) **(você)**
 - [x] Aplicada em `sim/tools/body.py`; prévia, F1 e documentos refeitos: 254 mm, 518 g, ritmo com folga até ~0,7 passo/s **(Claude)**
 - [x] Braço com cotovelo e punho que gira, mão fixa (4 SG90 por braço, 16 no total) — decidido em 24/10 **(você)**; cadeia modelada pelas marcações das 8 cabeças, simulado: 573 g, ritmo até ~0,67 passo/s ([arquitetura_corpo.md](arquitetura_corpo.md)) **(Claude)**
@@ -77,11 +77,12 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [ ] Rever a decisão dos 8 DOF se o tornozelo roll passar de ~70 % do SG90 no ritmo desejado, ou se a inclinação continuar acima de ~20° depois de afinar o quadril (F2) **(juntos)**
 - **F2 — Varredura na GPU**
   - [x] Varrer coxa/canela × largura do quadril × peso das capas → torque vs SG90, parado e em movimento — 360 robôs em `sim/tools/f2_sweep.py` **(Claude)**
-  - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`) **(juntos)**
+  - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`); revistas pelo conceito do suporte para quadris 50 mm e pé 45 × 70 **(juntos)**
 - **F3 — Modelo do servo SG90**
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**
   - [ ] Firmware da bancada: degrau de posição, gravar posição e corrente **(juntos)**
   - [ ] Medir os 8 servos (+ reservas) e escolher os melhores para joelhos/tornozelos **(você)**
+  - [ ] Medir a corrente de stall real do clone e confirmar o regulador D24V150F5 ([alimentacao.md](alimentacao.md)); se passar bem de 0,75 A, rever a escolha **(você)**
   - [ ] Modelo do servo (torque × velocidade, folga, zona morta, atraso) calibrado **(Claude)**
   - [ ] Simular degraus de posição sem rampa com o servo calibrado (o SG90 satura e puxa o stall): pico de torque e de corrente; refazer `current_budget.py` e conferir a margem do D24V150F5 ([alimentacao.md](alimentacao.md)) **(Claude)**
 - **F4 — Ponte CAD → simulação**

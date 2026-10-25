@@ -86,7 +86,7 @@ def stats(load: np.ndarray, dt: float, n: int, i_stall: float):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", default="f1")
-    ap.add_argument("--tilt", type=float, default=12.0, help="ankle roll amplitude while rocking, degrees")
+    ap.add_argument("--tilt", type=float, default=9.0, help="ankle roll amplitude while rocking, degrees")
     args = ap.parse_args()
     m = mujoco.MjModel.from_xml_path(str(MODELS.get(args.model, args.model)))
     n, dt = m.nu, m.opt.timestep
@@ -104,7 +104,7 @@ def main():
               + "   ".join(" / ".join(f"{c[k]:4.1f}" for c in cols) for k in range(3)))
     print("\n  carga = soma de |torque| / stall nos servos, no pico (quantos servos travados equivale)")
     print("\nNÃO SIMULADO (conta):")
-    for name, servos, amps in (("ligar: os 16 vão à 1ª posição juntos", n, I_STALL_A),
+    for name, servos, amps in ((f"ligar: os {n} vão à 1ª posição juntos", n, I_STALL_A),
                                ("queda ou trava: as 8 juntas da perna no stall", 8, I_STALL_A),
                                ("gesto: 8 servos do braço movendo juntos, sem carga", 8, (I_MOVE_A,) * 3)):
         total = [servos * a + (n - servos) * I_IDLE_A for a in amps]

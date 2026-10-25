@@ -1,6 +1,6 @@
 """Lateral rocking test: shift the body from one foot to the other at walking pace (open loop).
 
-    .venv/bin/python sim/tools/rocking_test.py [--model f1] [--tilt 12] [--cycles 4] [--arm 60]
+    .venv/bin/python sim/tools/rocking_test.py [--model f1] [--tilt 9] [--cycles 4] [--arm 60]
 
 With no hip roll, the weight moves sideways by tilting the whole body over the stance foot with
 both ankle rolls (feet kept parallel to the floor). One cycle = shift onto the left foot, lift and
@@ -88,7 +88,7 @@ def run(m, period: float, roll_max: float, cycles: int, arm: float = 0.0, arm_si
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", default="f1")
-    ap.add_argument("--tilt", type=float, default=12.0, help="ankle roll amplitude, degrees")
+    ap.add_argument("--tilt", type=float, default=9.0, help="ankle roll amplitude, degrees (9: the 615 g robot shifts and lifts the foot)")
     ap.add_argument("--arm", type=float, default=0.0, help="arm opening, degrees")
     ap.add_argument("--arm-side", choices=("free", "stance"), default="free", help="which arm opens")
     ap.add_argument("--cycles", type=int, default=4)
