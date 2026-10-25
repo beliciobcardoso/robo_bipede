@@ -125,7 +125,7 @@ Limites que as variantes têm de respeitar:
       com o tronco final, e conferir que o `f1_biped.xml` regenerado é o que vai no commit **(Claude)**
 - [x] Registrar os números novos (massa, picos, inclinação) em `simulacao.md` e
       `arquitetura_corpo.md`, com a comparação antes/depois **(Claude)**
-- [ ] Rever o gatilho dos 8 DOF com os números novos: a inclinação a 1 passo/s passou de 20°, mas o
+- [x] Rever o gatilho dos 8 DOF com os números novos (decidido em 25/10: ritmo de projeto, não dispara; joelho virou item próprio no backlog): a inclinação a 1 passo/s passou de 20°, mas o
       ritmo de projeto é ~0,67 passo/s. Decidir se o gatilho vale para o ritmo de projeto ou para
       1 passo/s, e escrever isso no backlog **(juntos)**
       Recomendação (25/10): o gatilho vale no ritmo de projeto (0,67 passo/s). Lá a inclinação é 14° e o
@@ -140,7 +140,7 @@ Limites que as variantes têm de respeitar:
       - ~~"quadris 45 mm, pé 40 × 70" em `backlog.md` e `simulacao.md`~~ (feito em 25/10)
       - ~~"UBEC" em `arquitetura_corpo.md`, backlog e `CLAUDE.md`~~ (feito com a decisão 0.1)
       - tamanho do tronco e V no `CLAUDE.md` e em `arquitetura_corpo.md`
-- [ ] Backlog §3.1 "Orçamento de massa das capas": decidir se o cálculo pela forma (`body.py`) fecha o
+- [x] Backlog §3.1 "Orçamento de massa das capas" (decidido em 25/10: feito pela forma, conferir na F4): decidir se o cálculo pela forma (`body.py`) fecha o
       item ou se ele só fecha na F4, com a massa das peças reais **(juntos)**
       Recomendação (25/10): o orçamento pela forma (133 g com 0,8 mm) vale como orçamento; o item fecha na F4,
       conferindo na balança.
