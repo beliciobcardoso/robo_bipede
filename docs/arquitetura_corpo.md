@@ -10,7 +10,7 @@ mesmo arquivo — mudou uma medida, tudo muda junto. A perna em detalhe continua
 | Segmento | Juntas (servo) | O que carrega | Capa |
 |----------|----------------|---------------|------|
 | **Perna** (×2) | quadril pitch, joelho, tornozelo pitch, tornozelo roll | suportes + garfos + 623ZZ, pé 70 × 45 mm | coxa, canela, tornozelo (as juntas ficam à mostra) |
-| **Tronco** | — (os 2 servos do quadril e os 2 do ombro pitch ficam nele) | LiPo 2S ~55 g, ESP32, PCA9685, MPU-6050, UBEC, placa | escudo: largo nos ombros, mais estreito no quadril |
+| **Tronco** | — (os 2 servos do quadril e os 2 do ombro pitch ficam nele) | LiPo 2S ~55 g, ESP32, PCA9685, MPU-6050, reguladores (servos D24V150F5 + lógica D24V10F5), placa | escudo: largo nos ombros, mais estreito no quadril |
 | **Braço** (×2) | ombro pitch (no tronco), ombro roll (dentro do braço), cotovelo (dentro do antebraço), punho que gira (dentro da mão) | mão fixa | ombreira (elipsoide), braço (cápsula), antebraço (largo no servo, fino até o punho), mão |
 | **Cabeça** | — (fixa) | HC-SR04 olhando para a frente, 10 g reservados para a câmera (ESP32-CAM) | casca elipsoide com viseira |
 

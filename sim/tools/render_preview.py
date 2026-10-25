@@ -52,7 +52,7 @@ def hidden(m: mujoco.MjModel, mode: str) -> list[int]:
         if mode != "capas" and n.startswith("cv_"):
             out.append(i)
         elif mode == "detalhe" and (n.endswith("_r") or any(k in n for k in ("shoulder", "arm", "elbow", "wrist", "hand"))
-                                    or n.startswith(("ultrasonic", "us_eye", "pv_battery", "pv_esp32", "pv_mpu"))
+                                    or n.startswith(("ultrasonic", "us_eye", "pv_part"))
                                     or n == "torso"):
             out.append(i)
     return out

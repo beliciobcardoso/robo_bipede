@@ -34,20 +34,22 @@ calculadas pela forma — 24/10). **SG90 em todas as juntas** (decisão de
 
 ## Alimentação
 
-Pico de corrente: SG90 trava em ~0,7 A cada → 16 servos podem pedir **~11 A** em pico (pior caso
-teórico, por exemplo todos se movendo ao ligar; andando, os braços ficam quase parados — medir o real
-com o INA219 na F3).
+Corrente dos servos ([alimentacao.md](alimentacao.md), 25/10): andando, pico < 2,5 A; queda ou trava
+~6 A; ligar os 16 de uma vez ~12 A — o firmware liga em grupos para não chegar lá. Medir o real com o
+INA219 na F3.
 
 - [X] **Bateria 2S (7,4 V)** — 1 — **LiPo 2S ~800 mAh, ~55 g** (decidido em 24/10: com braços, as
   2× 18650 de ~95 g tiram a margem do tornozelo roll). Se o que você tem são 18650, desmarque e compre a LiPo
-- [X] **BMS 2S** — 1 — só se usar 18650 sem proteção
-- [ ] **UBEC 5–6 V, ≥ 10 A** — 1 — trilho único dos 16 servos (trilho separado para os braços não compensa a fiação extra)
+- [ ] **Pack 2S1P 14500 alta descarga (IMR), soldado a ponto** — 1 — para testar contra a LiPo (25/10); células sem proteção interna, marca com teste publicado, ≥ 5 A contínuos, 700–800 mAh reais (ignorar "1200 mAh")
+- [X] **BMS 2S** — 1 — no pack 2S1P 14500: com balanceamento, sobrecorrente ≥ 8–10 A
+- [ ] **Regulador dos servos Pololu D24V150F5 (5 V, 15 A)** — 1 — trilho único dos 16 servos (trilho separado para os braços não compensa a fiação extra); decidido em 25/10 no lugar do UBEC e do D24V90F5 ([alimentacao.md](alimentacao.md))
+- [ ] **Regulador da lógica Pololu D24V10F5 (5 V, 1 A)** — 1 — ESP32, PCA9685 (lógica), MPU-6050 e HC-SR04 direto da bateria, fora do trilho dos servos: um stall derruba o trilho sem reiniciar o ESP32 (decidido em 25/10). Não tem proteção contra inversão — fica depois da chave e do conector polarizado
 - [X] **Capacitor eletrolítico 470–1000 µF / 16 V** — 2 — junto ao trilho dos servos, segura queda nos picos
-- [X] **Chave liga/desliga ≥ 5 A** — 1 — conferir se aguenta ~11 A de pico com 16 servos
-- [X] **Fusível ou PTC ~5 A** — 1 — proteção da bateria; **com 16 servos, trocar por ~10 A de ação retardada**
+- [X] **Chave liga/desliga ≥ 5 A** — 1 — fica do lado da bateria, junto do fusível: conferir se aguenta 7,5 A
+- [ ] **Fusível 7,5 A de ação retardada** — 1 — proteção da bateria, dimensionado pela corrente que sai dela (~5 A numa queda a 7,4 V); decidido em 25/10. O de 5 A que você tem não serve com 16 servos
 - [X] **Divisor resistivo para medir bateria** (ex.: 100 kΩ + 33 kΩ) — 1 — ADC do ESP32, corte por subtensão
 - [X] **Carregador balanceado 2S** (ou carregador 18650) — 1
-- [X] **Conector de bateria** (XT30 ou JST) — 1 par
+- [X] **Conector de bateria XT30** — 1 par por pack + 1 no robô — padrão das duas baterias (25/10); balanceamento em JST-XH 3 pinos nos dois packs, para o mesmo carregador
 
 ## Cabeamento e montagem eletrônica
 

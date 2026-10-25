@@ -29,7 +29,6 @@ ARM_STOPS = {
     "wrist": (-90.0, 90.0),
 }
 SERVO_HALF_MM = (6.1, 11.8, 11.5)        # SG90 body: 12.2 x 23.6 x 23 mm, shaft along Y (pitch)
-SHOULDER_STACK_MM = 42.5                 # horn + servo + bearing along the pitch axis (docs/suporte_servo.md)
 # The shoulder roll servo hangs body-down inside the upper arm, slid forward along its shaft so its
 # holder is centred in the arm; its horn + bearing stack (along X) is then centred this far forward.
 SHOULDER_ROLL_STACK_X_MM = 5.25
@@ -65,6 +64,52 @@ SERVOS = {
 }
 
 
+@dataclass(frozen=True)
+class TorsoPart:
+    """Something carried inside the torso frame: a box in its own axes (length, width, thickness),
+    plus envelopes kept free for what plugs into it. An envelope listed in `access` must reach the
+    torso wall (a cable plugged from outside: USB, switch). Sizes are catalogue values — measure
+    the real part and update."""
+    label: str
+    size_mm: tuple
+    mass_g: float
+    source: str
+    envelopes: tuple = ()      # ((centre xyz in the part frame, half sizes xyz), ...) mm
+    access: tuple = ()         # indices into envelopes
+    flat: bool = False         # thickness must stay vertical (the IMU)
+
+
+# What the torso carries (2026-10-24). Positions: TORSO_LAYOUT, found by sim/tools/torso_layout.py.
+TORSO_PARTS = {
+    # 2026-10-25 (user): two packs to test, same XT30 + JST-XH balance plug; the bay is the LiPo's,
+    # which also holds the 2S1P 14500 pack (~28 x 14 x 51 mm, ~53 g) — mass kept at the heavier one
+    "bateria": TorsoPart("bateria 2S: LiPo 800 mAh ou 2S1P 14500", (56.0, 31.0, 17.0), 55.0,
+                         "Gens Ace 2S 800 mAh: 55 × 30 × 16 mm, 50 g + cabos e XT30; 2S1P 14500 cabe no mesmo vão",
+                         envelopes=(((34.0, 0.0, 0.0), (6.0, 12.0, 7.0)),)),          # leads at one end
+    # 2026-10-25 (user): servo rail and logic on separate regulators; docs/alimentacao.md
+    "regulador": TorsoPart("regulador dos servos 5 V 15 A (Pololu D24V150F5)", (43.2, 31.8, 11.0), 10.0,
+                           "Pololu D24V150F5: 43,2 × 31,8 × 11 mm; massa não informada, 10 g estimado — pesar",
+                           envelopes=(((26.6, 0.0, 0.0), (5.0, 10.0, 5.5)),)),       # wires at one end
+    "regulador_logica": TorsoPart("regulador da lógica 5 V 1 A (Pololu D24V10F5)", (18.0, 13.0, 3.5), 1.0,
+                                  "Pololu D24V10F5: 18 × 13 × 3,5 mm; massa não informada, 1 g estimado — pesar",
+                                  envelopes=(((12.0, 0.0, 0.0), (3.0, 5.0, 3.0)),)),  # wires at one end
+    "controle": TorsoPart("ESP32 DevKit em placa perfurada", (56.0, 34.0, 16.0), 18.0,
+                          "ESP32 DevKit V1 51,8 × 28,2 mm em barra fêmea sobre placa 56 × 34 mm",
+                          envelopes=(((-35.0, 0.0, 4.0), (7.0, 6.0, 5.0)),), access=(0,)),   # USB plug
+    "pca9685": TorsoPart("PCA9685 (16 servos)", (62.5, 25.4, 11.0), 9.0,
+                         "Adafruit PCA9685: 62,5 × 25,4 mm; bornes ~10 mm de altura",
+                         envelopes=(((0.0, 23.7, 0.0), (31.25, 11.0, 5.5)),)),       # 16 plugs, right-angle headers
+    "distribuicao": TorsoPart("placa de força", (45.0, 30.0, 14.0), 15.0,
+                              "capacitores 2 × 1000 µF deitados, fusível 7,5 A retardado, divisor da bateria, buzzer, XT30 (estimado)"),
+    "mpu6050": TorsoPart("MPU-6050 (GY-521)", (21.0, 16.0, 5.0), 2.0, "GY-521: 21 × 16 mm", flat=True),
+    "chave": TorsoPart("chave liga/desliga", (21.0, 15.0, 18.0), 4.0, "rocker mini 21 × 15 mm, 18 mm de corpo",
+                       envelopes=(((0.0, 0.0, -10.0), (10.5, 7.5, 1.0)),), access=(0,)),  # button face on the cover
+}
+TORSO_WIRING_G = 8.0           # power leads, I2C, signal wires inside the torso (servo cables count with the servos)
+# name -> (centre xyz mm in the torso frame, rotation: rows = torso axes, columns = part length/width/thickness)
+TORSO_LAYOUT = {}
+
+
 def _all_sg90() -> dict:
     return {j: "sg90" for j in (*JOINT_STOPS, *ARM_STOPS)}
 
@@ -83,10 +128,11 @@ class BipedParams:
     # Torso frame (the skeleton box, x depth, y width, z height, mm) and what it carries (g)
     # Proportions approved 2026-10-24 (Alpha 1 look with SG90, docs/arquitetura_corpo.md): torso 68 mm,
     # 86 mm at the shoulders, big head -> head / torso / legs = 20 / 31 / 50 % of 254 mm
-    torso_size_mm: tuple = (50.0, 70.0, 68.0)
-    torso_top_width_mm: float = 86.0  # frame width at the shoulders (>= 2 x 42.5 gives the shoulder pitch its 623ZZ)
-    battery_g: float = 55.0         # LiPo 2S ~800 mAh (approved 2026-10-24; 2 x 18650 = 95 g left too little margin with arms)
-    electronics_g: float = 35.0     # ESP32, MPU-6050, perfboard, UBEC
+    # 2026-10-25: 76 deep and 78 at the hips (was 50 x 70) so the electronics fit between the 4 torso
+    # servos (sim/tools/torso_layout.py); a mild V from the shoulders down, chosen by the user
+    torso_size_mm: tuple = (76.0, 78.0, 68.0)
+    torso_top_width_mm: float = 86.0  # frame width at the shoulders
+    shoulder_pitch_body: str = "front"  # shoulder pitch servo body lies "back" / "front" / "down" from its shaft
     torso_struct_g_per_cm2: float = 25.0 / 178.0   # frame plates: 25 g on a 50 x 70 x 45 mm frame (scaled by area)
 
     # Per-leg segment structure (g), excluding servos and covers
@@ -212,15 +258,15 @@ class BipedParams:
                    self.forearm_cover_half_mm[1], self.wrist_cover_half_mm[1], self.hand_cover_half_mm[1])
         return 2 * (self.shoulder_y_mm + half)
 
-    @property
-    def shoulder_bearing(self) -> bool:
-        """Both shoulder pitch stacks (with the 623ZZ) fit side by side inside the torso frame."""
-        return self.torso_top_width_mm / 2 >= SHOULDER_STACK_MM
-
     def servo(self, joint: str) -> Servo:
         return SERVOS[self.servos[joint]]
 
     # ------------------------------------------------------------------ masses
+    @property
+    def torso_contents_g(self) -> float:
+        """Battery, boards, regulator, switch and wiring (TORSO_PARTS)."""
+        return sum(part.mass_g for part in TORSO_PARTS.values()) + TORSO_WIRING_G
+
     @property
     def torso_struct_g(self) -> float:
         x, y, z = self.torso_size_mm
@@ -256,7 +302,7 @@ class BipedParams:
     @property
     def total_mass_g(self) -> float:
         c = self.covers_g
-        torso = self.battery_g + self.electronics_g + self.torso_struct_g + c["torso"]
+        torso = self.torso_contents_g + self.torso_struct_g + c["torso"]
         leg = (self.thigh_struct_g + self.shin_struct_g + self.ankle_struct_g + self.foot_struct_g
                + c["thigh"] + c["shin"] + c["ankle"] + sum(self.servo(j).mass_g for j in JOINT_STOPS))
         head = (self.ultrasonic_g + self.camera_reserve_g + c["head"]) if self.head else 0.0

@@ -31,6 +31,8 @@ Documentos de apoio: [corpo inteiro](arquitetura_corpo.md) · [prévia 3D](previ
 - [x] Braço com cotovelo e punho que gira, mão fixa (4 SG90 por braço, 16 no total) — decidido em 24/10 **(você)**; cadeia modelada pelas marcações das 8 cabeças, simulado: 573 g, ritmo até ~0,67 passo/s ([arquitetura_corpo.md](arquitetura_corpo.md)) **(Claude)**
 - [x] Forma das capas: quase retas — ombros 18,2 cm, 569 g — decidido em 24/10 **(você)**
 
+- [ ] Correções do tronco, do regulador e dos documentos — tarefas em [plano_correcoes_tronco.md](plano_correcoes_tronco.md) **(juntos)**
+
 ## Sempre
 
 - [ ] Atualizar a [prévia 3D](previa.md) a cada mudança de medida, peça ou conceito (`make preview` + histórico) **(Claude)** — item permanente
@@ -42,12 +44,15 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Rolamentos 623ZZ chegarem (já comprados) **(você)**
 - [ ] Impressora 3D **(você)**
 - [ ] Filamento PETG **(você)**
-- [ ] UBEC 5–6 V ≥ 10 A (16 servos) **(você)**
+- [ ] Regulador dos servos Pololu D24V150F5 (5 V, 15 A) — decidido em 25/10 ([alimentacao.md](alimentacao.md)) **(você)**
+- [ ] Regulador da lógica Pololu D24V10F5 (5 V, 1 A) — ESP32 fora do trilho dos servos, decidido em 25/10 **(você)**
 - [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
+- [ ] Pack 2S1P 14500 alta descarga com BMS — testar contra a LiPo; os dois com XT30 + JST-XH 3 pinos (25/10) **(você)**
+- [ ] Comparar as duas baterias na bancada: queda de tensão a 5–6 A, autonomia, temperatura; escolher uma **(juntos)**
 - [ ] 8 servos SG90 para os braços + reservas novas **(você)**
 - [ ] PCA9685 (16 canais de PWM; os 16 servos ocupariam todos os 16 canais do LEDC do ESP32) **(você)**
 - [ ] HC-SR04 **(você)**
-- [ ] Fusível ~10 A de ação retardada no lugar do de 5 A **(você)**
+- [ ] Fusível 7,5 A de ação retardada no lugar do de 5 A — decidido em 25/10 **(você)**
 - [ ] Parafusaria: M3 (8/10/12/16), porcas M3 autotravantes, arruelas M3, M2 (6/8) **(você)**
 - [ ] Borracha antiderrapante para a sola **(você)**
 - [ ] INA219 — necessário para a bancada do servo (F3) **(você)**
@@ -155,7 +160,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 ## 5. Eletrônica
 
-- [ ] Esquema elétrico: bateria → fusível → chave → UBEC → trilho dos 16 servos; ESP32 + PCA9685 (I2C); MPU; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
+- [ ] Esquema elétrico: bateria → fusível 7,5 A → chave → D24V150F5 → trilho dos 16 servos (+ 2 × 1000 µF); bateria → D24V10F5 → ESP32 + lógica do PCA9685 (I2C), MPU, HC-SR04, terra comum; PG do D24V150F5 num pino do ESP32; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
 - [ ] Placa de distribuição em placa perfurada **(você)**
 - [ ] Teste com fonte de bancada limitando corrente, antes da bateria **(você)**
 - [ ] Fiação no robô com extensões e organização dos cabos **(você)**
@@ -163,6 +168,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 ## 6. Firmware (ESP32)
 
 - [ ] PWM dos 16 servos pelo PCA9685 (I2C) **(juntos)**
+- [ ] Ligar escalonado: PCA9685 com OE desligado até a 1ª posição; servos ligados em grupos de 2 a 4, ~150 ms entre grupos (sem isso, ~12 A ao ligar — [alimentacao.md](alimentacao.md)) **(juntos)**
 - [ ] Leitura do HC-SR04: distância à frente, parar antes de obstáculo **(juntos)**
 - [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
 - [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**
