@@ -1,11 +1,12 @@
-"""Fit the torso contents (body.TORSO_PARTS) between the servos inside the torso frame.
+"""Fit what a segment carries (body.BODY_PARTS with that seat) between the servos inside its frame.
 
-    .venv/bin/python sim/tools/torso_layout.py --search    # find a layout, print it for body.TORSO_LAYOUT
-    .venv/bin/python sim/tools/torso_layout.py              # check the stored layout + free volume left
+    .venv/bin/python sim/tools/torso_layout.py [--seat pelvis] --search   # find a layout, print it for body.<SEAT>_LAYOUT
+    .venv/bin/python sim/tools/torso_layout.py [--seat pelvis]            # check the stored layout + free volume left
 
-1 mm voxel grid of the frame interior (walls 2 mm, width tapering from the hips to the shoulders).
-Taken: the servos and holders inside the torso (from the preview model) and everything the hip
-yokes and the shoulder horns sweep over their joint range. Each part is a box plus envelopes kept
+1 mm voxel grid of the frame interior (walls 2 mm; the torso width tapers up to the shoulders, the
+pelvis is a plain box). Taken: the servos and holders inside the segment (from the preview model)
+and everything the joints next to it sweep over their range (shoulder horns for the torso, hip
+yokes for the pelvis). Each part is a box plus envelopes kept
 free for what plugs into it (servo plugs, wires, USB); an access envelope must reach the wall so
 the cable can come from outside. The search tries every axis-aligned rotation of every part and
 every position (summed-volume table, so all positions are tested at once), places the parts
@@ -22,8 +23,15 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import body  # noqa: E402
-from body import TORSO_PARTS, BipedParams  # noqa: E402
+from body import BODY_PARTS, BipedParams  # noqa: E402
+
 from build_biped import load_preview  # noqa: E402
+
+# seat -> (body, joints whose output sweeps near it as (child body prefix, joint prefix))
+SEGMENTS = {"torso": ("torso", (("shoulder", "shoulder_pitch"),)),
+            "pelvis": ("pelvis", (("thigh", "hip_pitch"),))}
+SEAT = "torso"                     # set by main()
+TORSO_PARTS = {k: v for k, v in BODY_PARTS.items() if v.seat == SEAT}   # parts of SEAT (name kept)
 
 WALL_MM = 2.0
 CLEAR_MM = 1                       # air kept around the servos and the swept parts
@@ -31,20 +39,31 @@ SWEEP_STEP_DEG = 10.0
 CANDIDATES = 16                    # positions tried per part when backtracking
 DIVERSE_MM = 8.0                   # candidates of one rotation at least this far apart
 STRIDE = 2                         # candidate centres sampled every STRIDE mm (all positions still checked)
-ORDER = ("bateria", "regulador", "pca9685", "controle", "distribuicao", "chave", "regulador_logica", "mpu6050")
+ORDER = tuple(TORSO_PARTS)
+
+
+def use_seat(seat: str):
+    global SEAT, TORSO_PARTS, ORDER
+    SEAT = seat
+    TORSO_PARTS = {k: v for k, v in BODY_PARTS.items() if v.seat == seat}
+    ORDER = tuple(TORSO_PARTS)
 
 
 # ------------------------------------------------------------------ grid
 class Grid:
-    """Torso-frame voxels: index i <-> coordinate lo + i (mm)."""
+    """Segment-frame voxels: index i <-> coordinate lo + i (mm)."""
 
     def __init__(self, p: BipedParams):
-        tx, ty, tz = p.torso_size_mm
-        self.lo = np.array([-tx / 2, -max(ty, p.torso_top_width_mm) / 2, -tz / 2])
-        self.shape = (int(tx), int(max(ty, p.torso_top_width_mm)), int(tz))
+        if SEAT == "pelvis":
+            tx, ty, tz = p.pelvis_depth_mm, p.pelvis_width_mm, p.pelvis_height_mm
+            top = ty
+        else:
+            (tx, ty, tz), top = p.torso_size_mm, p.torso_top_width_mm
+        self.lo = np.array([-tx / 2, -max(ty, top) / 2, -tz / 2])
+        self.shape = (int(tx), int(max(ty, top)), int(tz))
         x, y, z = (np.arange(n) + 0.5 + lo for n, lo in zip(self.shape, self.lo))
         X, Y, Z = np.meshgrid(x, y, z, indexing="ij")
-        half_y = ty / 2 + (p.torso_top_width_mm - ty) / 2 * (Z + tz / 2) / tz - WALL_MM
+        half_y = ty / 2 + (top - ty) / 2 * (Z + tz / 2) / tz - WALL_MM
         self.inside = (abs(X) < tx / 2 - WALL_MM) & (abs(Y) < half_y) & (abs(Z) < tz / 2 - WALL_MM)
         self.taken = ~self.inside
 
@@ -66,16 +85,16 @@ def _torso_frame_aabb(m, d, g, torso):
 
 
 def mark_servos(grid: Grid, p: BipedParams):
-    """Servo, holder, horn, yoke visuals near the torso: fixed ones as they are, the hip and shoulder
-    ones over their whole joint range."""
+    """Servo, holder, horn, yoke visuals in the segment as they are, and those of the joints next to
+    it over their whole range."""
     m = load_preview(p)
     d = mujoco.MjData(m)
-    torso = m.body("torso").id
-    movers = {m.body(f"{b}_{s}").id: f"{j}_{s}" for b, j in (("thigh", "hip_pitch"), ("shoulder", "shoulder_pitch"))
-              for s in "lr"}
-    for body, joint in [(torso, None), *movers.items()]:
-        geoms = [g for g in range(m.ngeom) if m.geom_bodyid[g] == body and m.geom(g).name.startswith("pv_")
-                 and not m.geom(g).name.startswith(("pv_battery", "pv_esp32", "pv_mpu", "pv_part"))]
+    seg_body, near = SEGMENTS[SEAT]
+    torso = m.body(seg_body).id
+    movers = {m.body(f"{b}_{s}").id: f"{j}_{s}" for b, j in near for s in "lr"}
+    for owner, joint in [(torso, None), *movers.items()]:
+        geoms = [g for g in range(m.ngeom) if m.geom_bodyid[g] == owner and m.geom(g).name.startswith("pv_")
+                 and not m.geom(g).name.startswith("pv_part")]
         if joint is None:
             angles = [0.0]
         else:
@@ -149,10 +168,8 @@ def score(name, centres: np.ndarray, rot, p: BipedParams) -> np.ndarray:
     """Preference of each candidate centre (N x 3, mm), lower is better."""
     x, y, z = centres.T
     if name == "bateria":
-        # TODO(human): where should the battery (55 g, the heaviest part in the torso) go?
-        # Return one number per candidate (array like x), lower = better. Torso frame in mm:
-        # x forward (back wall -36, front +36), y left (+-37 at the hips), z up (floor -32, top +32).
-        raise NotImplementedError("battery placement preference")
+        # 2026-10-25 (user): in the pelvis, against the back wall (drawer door) and low (centre of mass)
+        return 2 * x + z
     if name == "mpu6050":
         return np.abs(x) + np.abs(y) + np.abs(z + 10)  # near the middle of the robot
     return -2 * np.abs(x) - 0.5 * np.abs(y)            # boards against the walls: the middle stays free for cables
@@ -178,7 +195,7 @@ def _options(grid: Grid, name, p, sat, outside_sat):
         idx = np.argwhere(ok[::STRIDE, ::STRIDE, ::STRIDE]) * STRIDE
         if len(idx) == 0:
             idx = np.argwhere(ok)
-        centres = idx + grid.lo + 0.5
+        centres = idx + grid.lo                 # a box of 2h voxels from i - h spans lo + i +- h mm
         sc = score(name, centres, rot, p)
         best = np.argsort(sc)[:CANDIDATES * 40]
         out += [(sc[i], tuple(np.round(centres[i], 1)), rot) for i in best]
@@ -216,11 +233,14 @@ def search(grid: Grid, p: BipedParams, chosen=None):
 
 
 def check(grid: Grid, layout) -> list:
-    """Overlaps of the stored layout (mm³ per part)."""
-    problems = []
+    """Overlaps of the stored layout (mm³ per part), and parts of the seat missing from it."""
+    problems = [(name, "fora do layout", 0) for name in TORSO_PARTS if name not in layout]
     for name, (centre, rot) in layout.items():
+        i0 = np.round(np.array(centre) - grid.lo).astype(int)              # centre voxel, as in the search
         for k, (c, h) in enumerate(boxes(TORSO_PARTS[name], np.array(rot))):
-            sl = grid.box(np.array(centre) + c - h, np.array(centre) + c + h)
+            size = np.maximum(1, np.round(2 * h).astype(int))
+            low = i0 + np.round(c - size / 2).astype(int)
+            sl = tuple(slice(max(0, a), max(0, a + n)) for a, n in zip(low, size))
             clash = int(grid.taken[sl].sum())
             if clash:
                 problems.append((name, "corpo" if k == 0 else f"envelope {k - 1}", clash))
@@ -263,26 +283,30 @@ def render(p: BipedParams, out: Path, title: str):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--search", action="store_true")
+    ap.add_argument("--seat", choices=tuple(SEGMENTS), default="torso")
     args = ap.parse_args()
+    use_seat(args.seat)
     p = BipedParams()
     grid = Grid(p)
     mark_servos(grid, p)
     free0 = int((grid.inside & ~grid.taken).sum())
-    print(f"tronco {p.torso_size_mm} (ombros {p.torso_top_width_mm:.0f}), ombro pitch com o corpo '{p.shoulder_pitch_body}': "
-          f"interior {grid.inside.sum() / 1000:.0f} cm³, livre entre os servos {free0 / 1000:.0f} cm³")
+    size = (p.pelvis_depth_mm, p.pelvis_width_mm, p.pelvis_height_mm) if SEAT == "pelvis" else p.torso_size_mm
+    print(f"{SEAT} {size}: interior {grid.inside.sum() / 1000:.0f} cm³, livre entre os servos {free0 / 1000:.0f} cm³, "
+          f"peças {', '.join(ORDER)}")
     if args.search:
         layout = search(grid, p)
         if layout is None:
             print("NÃO CABE: nenhuma arrumação encontrada")
             sys.exit(1)
-        print("TORSO_LAYOUT = {")
+        print(f"{SEAT.upper()}_LAYOUT = {{")
         for name, (centre, rot) in layout.items():
             print(f'    "{name}": ({tuple(float(v) for v in centre)}, {tuple(tuple(int(v) for v in row) for row in rot)}),')
         print("}")
     else:
-        problems = check(grid, {k: (v[0], v[1]) for k, v in body.TORSO_LAYOUT.items()})
+        stored = getattr(body, f"{SEAT.upper()}_LAYOUT")
+        problems = check(grid, {k: (v[0], v[1]) for k, v in stored.items()})
         for name, what, mm3 in problems:
-            print(f"  COLISÃO {name} ({what}): {mm3} mm³")
+            print(f"  FALTA {name}: sem posição gravada" if not mm3 else f"  COLISÃO {name} ({what}): {mm3} mm³")
         if not problems:
             print("  todas as peças cabem, sem colisão")
     left = int((grid.inside & ~grid.taken).sum())

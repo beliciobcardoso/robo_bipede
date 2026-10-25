@@ -24,7 +24,8 @@ SG90 = 0.18
 FALL_TILT_DEG = 30.0
 TYPES = ("hip_pitch", "knee", "ankle_pitch", "ankle_roll")
 CROUCH = {"hip_pitch": 1.0, "knee": -2.0, "ankle_pitch": 1.0, "ankle_roll": 0.0,
-          "shoulder_pitch": 0.0, "shoulder_roll": 0.0, "elbow": 0.0, "wrist": 0.0}   # arms stay put while crouching
+          "shoulder_pitch": 0.0, "shoulder_roll": 0.0, "elbow": 0.0, "wrist": 0.0,   # arms stay put while crouching
+          "waist_yaw": 0.0, "hip_roll": 0.0}
 
 
 class Robot:
@@ -46,7 +47,8 @@ class Robot:
         return np.clip(u, self.lo, self.hi)
 
     def tilt(self, d) -> float:
-        return float(np.degrees(2 * np.arccos(min(1.0, abs(float(d.xquat[self.torso][0]))))))
+        """Angle of the torso's up axis from vertical (the waist yaw does not count)."""
+        return float(np.degrees(np.arccos(np.clip(d.xmat[self.torso][8], -1.0, 1.0))))
 
     def torques(self, d, side: str) -> dict:
         return {t: abs(float(d.actuator_force[self.idx[f"{t}_{side}"]])) for t in TYPES}

@@ -50,11 +50,40 @@ depois espera por elas. Ao terminar, os itens que sobrarem viram linhas no [back
 
 ### 0.2 Tronco em V suave (silhueta masculina)
 
-- [ ] Definir a métrica do V pelo que se vê, **com as capas**: largura externa nos ombros ÷ largura
-      externa na cintura (vista de frente), e peito ÷ barriga (vista de lado). Medir a do Alpha 1 nas
-      fotos como referência **(Claude)**
-- [ ] Gerar 3 ou 4 variantes renderizadas de frente e de lado (por exemplo: o V de hoje; ombros mais
-      largos; cintura mais fina; peito mais fundo que a barriga). Para cada uma: se a eletrônica cabe
+- [x] Definir a métrica do V pelo que se vê, **com as capas**, a partir das referências do usuário
+      (`docs/img/silhueta01–06.png`, medidas em 25/10; ver abaixo) **(Claude)**
+
+**Métrica (25/10).** Vista de frente, robô de pé, com as capas. Medida por renderização de
+segmentação, quase ortográfica (o script vai para `sim/tools/` na etapa das variantes). Larguras:
+
+- **ombros:** largura externa total na altura dos ombros (ombreiras e braços);
+- **peito:** capa do tronco na altura das axilas, sem os braços;
+- **cintura:** a menor largura da capa do tronco abaixo do peito;
+- **quadril:** largura externa na altura do eixo do quadril, com as coxas;
+- **cabeça:** largura máxima da cabeça.
+
+Medido nas imagens com as linhas desenhadas por cima e conferido no olho (figura gerada em 25/10;
+não vai para o repositório porque as referências têm marca d'água).
+
+| | 01 | 02 | 03 | 05 | 06 | Robô hoje | Meta "V suave" |
+|---|---|---|---|---|---|---|---|
+| **M1** peito ÷ cintura (o V) | 1,90 | 2,07 | 1,88 | 1,74 | 1,52 | **1,09** (99 / 90 mm) | **≥ 1,5** |
+| **M2** ombros ÷ quadril | 2,00 | 1,85 | 1,50 | 2,79 | 1,76 | 1,76 (176 / 100 mm) | manter (≥ 1,5) |
+| **M3** ombros ÷ altura | 0,58 | 0,56 | 0,46 | 0,68 | 0,45 | 0,70 (176 / 253 mm) | não piorar (≤ 0,75) |
+| **M4** cabeça ÷ peito | 0,61 | 0,49 | 0,66 | 0,39 | 0,67 | 0,59 (58 / 99 mm) | manter |
+
+**O que falta é só a cintura.**
+- Ombros contra quadril (M2), largura geral (M3) e cabeça (M4) já estão dentro da faixa das referências.
+- O V (M1) é o único fora: 1,09 contra 1,52–2,07.
+- Para M1 ≥ 1,5 com o peito de hoje (99 mm), a cintura da capa precisa ficar em **≤ 66 mm** (hoje 90).
+  Outra forma é alargar um pouco o peito e afinar menos a cintura.
+- A cintura é a base da capa do tronco, acima dos servos do quadril, então ela pode ficar mais
+  estreita que o quadril. Com os ombros a 1,76 × o quadril, isso dá V, como nas referências.
+
+Todas as referências são de frente: o perfil lateral (peito ÷ barriga) não tem referência e fica a
+critério visual.
+- [ ] Gerar 3 ou 4 variantes renderizadas de frente e de lado, centradas em afinar a cintura (M1 ≥ 1,5):
+      cintura fina com o tronco mais fundo ou mais alto, e peito um pouco mais largo com cintura média. Para cada uma: se a eletrônica cabe
       (`torso_layout.py --search`), massa, picos do `rocking_test` e folga do braço até a perna **(Claude)**
 - [ ] Escolher a variante **(você)**
 - [ ] Aplicar em `BipedParams`. Se a escolhida afinar a profundidade de cima para baixo, isso precisa
@@ -62,14 +91,15 @@ depois espera por elas. Ao terminar, os itens que sobrarem viram linhas no [back
 
 Limites que as variantes têm de respeitar:
 
-- **Cintura:** não fica mais estreita que os quadris de 50 mm mais a largura da perna (~42 mm), e
-  precisa caber a eletrônica. Cintura fina → tronco mais fundo ou mais alto.
+- **Cintura:** é a base da capa do tronco, acima dos servos do quadril, então pode ficar mais
+  estreita que o quadril. O limite é caber a eletrônica: cintura fina → tronco mais fundo ou mais alto.
+- **Quadril:** ~100 mm, fixado pelas pernas. Estreitar exige reabrir o conceito do suporte.
 - **Ombros:** mais largos → braço mais pesado e mais longe do centro (mais inércia no balanço lateral)
   e mais folga até a perna (hoje 3 mm).
 
 ### 0.3 Posição da bateria
 
-- [ ] Escrever a preferência da bateria em `score()` (`sim/tools/torso_layout.py`, `TODO(human)`),
+- [ ] ~~Tronco~~ Quadril: escrever a preferência da bateria em `score()` (a bateria foi para o quadril em 25/10; vale para o layout do quadril) (`sim/tools/torso_layout.py`, `TODO(human)`),
       já com as medidas da 0.2 **(você)**. Trade-offs:
       - **Bateria baixa:** centro de massa mais baixo, menos torque no tornozelo roll e no joelho ao
         inclinar. Em compensação o pêndulo fica mais rápido, e o acesso ao conector de carga é pior.
@@ -79,13 +109,15 @@ Limites que as variantes têm de respeitar:
 
 ## Fase 1 — Fechar o tronco no código
 
-- [ ] Rodar `torso_layout.py --search` e gravar o resultado em `body.TORSO_LAYOUT` **(Claude)**
-- [ ] O modo de checagem falha quando `TORSO_LAYOUT` está vazio ou falta alguma peça de
+- [x] Rodar `torso_layout.py --search` e gravar o resultado em `body.TORSO_LAYOUT` — 25/10: com a divisão tronco/quadril, só o ESP32 fica no tronco (50 × 78 × 45) e cabe **(Claude)**
+- [x] Checar o encaixe das peças no quadril — 25/10: `torso_layout.py --seat pelvis`; o menor que cabe é 76 × 92 × 52 (60 × 38 não cabe), bateria encostada na parede de trás (gaveta); gravado em `body.PELVIS_LAYOUT` **(Claude)**
+- [x] Corte de torque (25/10): capas 0,8 mm e quadril 76 × 92 × 52 → 612 g, 283 mm; numa perna 80 → 61 %, troca de pé 0,67 passo/s 119 → 108 % (estimativa F2) **(juntos)**
+- [x] O modo de checagem falha quando `TORSO_LAYOUT` está vazio ou falta alguma peça de — feito em 25/10 (aponta peça sem posição)
       `TORSO_PARTS`. Hoje ele aprova o que não checou **(Claude)**
-- [ ] Renomear a variável `body` em `mark_servos` (`torso_layout.py`), que sombreia o módulo `body`
+- [x] Renomear a variável `body` em `mark_servos` (`torso_layout.py`), que sombreia o módulo `body` — feito em 25/10
       importado, e tirar do filtro os prefixos `pv_battery` / `pv_esp32` / `pv_mpu`, que não existem
       mais **(Claude)**
-- [ ] `rocking_test.py`: mudar o `--tilt` padrão de 16° para 12°. Com 16° o robô cai em qualquer
+- [x] `rocking_test.py`: mudar o `--tilt` padrão de 16° para 12° (feito em 25/10). Com 16° o robô cai em qualquer
       ritmo, inclusive na versão de antes **(Claude)**
 
 ## Fase 2 — Re-simular e registrar

@@ -25,7 +25,7 @@ calculadas pela forma — 24/10). **SG90 em todas as juntas** (decisão de
 
 - [X] **ESP32 DevKit** — 1 — controle, MPU-6050, HC-SR04, Wi-Fi
 - [X] **MPU-6050** (acelerômetro + giroscópio 3 eixos) — 1 — equilíbrio; I2C, montar no centro do tronco
-- [ ] **PCA9685** (driver PWM 16 canais, I2C) — 1 — **necessário**: os 16 servos ocupariam todos os 16 canais do LEDC do ESP32
+- [ ] **PCA9685** (driver PWM 16 canais, I2C) — 1 — no quadril, para os 8 servos das pernas + o da cintura; os 8 dos braços vão direto no LEDC do ESP32 (divisão de 25/10, [alimentacao.md](alimentacao.md))
 - [ ] **HC-SR04** (sensor ultrassônico) — 1 — na cabeça, olhando para a frente; ECHO sai em 5 V → divisor resistivo (ex.: 1 kΩ + 2 kΩ) antes do GPIO
 - [ ] **ESP32-CAM** **(futuro)** — 1 — câmera na cabeça como placa separada, falando com o ESP32 principal por UART; 10 g já reservados na massa
 - [ ] **INA219** (sensor de corrente/tensão I2C) **(opcional)** — 1 — medir consumo dos servos, detectar travamento

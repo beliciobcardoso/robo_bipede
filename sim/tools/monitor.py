@@ -100,8 +100,8 @@ class Leg:
                 for i, r in enumerate(self.soft)]
 
     def tilt_deg(self, d) -> float:
-        w = abs(float(d.xquat[self.torso][0]))
-        return float(np.degrees(2 * np.arccos(min(1.0, w))))
+        """Angle of the torso's up axis from vertical (the waist yaw does not count)."""
+        return float(np.degrees(np.arccos(np.clip(d.xmat[self.torso][8], -1.0, 1.0))))
 
     def torso_z(self, d) -> float:
         return float(d.xpos[self.torso][2])

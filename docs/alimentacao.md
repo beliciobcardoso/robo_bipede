@@ -15,6 +15,18 @@ modelo de 620 g (tronco 76 × 78 × 68 mm). Para refazer: `.venv/bin/python sim/
   estão 10 g + 1 g estimados; pesar quando chegarem.
 - **Revisão:** esta escolha é revista se a bancada da F3 medir corrente de stall bem acima de 0,75 A.
 
+## Divisão tronco / quadril (25/10/2026, você)
+
+| Onde | O que fica |
+|---|---|
+| **Tronco** | ESP32, que gera o PWM dos 8 servos dos braços (LEDC); o HC-SR04 na cabeça |
+| **Quadril** | bateria, reguladores, placa de força, chave, MPU-6050, PCA9685 (8 servos das pernas + o da cintura) |
+| **Pela cintura** | trilho de 5 V dos servos (2 fios), 5 V da lógica, I2C (2): ~5 fios, nenhum cabo de servo |
+
+- **I2C:** o PCA9685 (0x40) e o MPU (0x68) ficam no mesmo barramento.
+- **IMU:** fica presa às pernas; o tronco gira na cintura.
+- **Modelo:** lugar de cada peça em `body.BODY_PARTS` (`seat`).
+
 ## Como a corrente foi estimada
 
 - **Modelo do servo:** a corrente de um motor DC segue o torque. Cada servo puxa

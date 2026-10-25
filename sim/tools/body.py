@@ -28,6 +28,12 @@ ARM_STOPS = {
     "elbow": (-10.0, 120.0),
     "wrist": (-90.0, 90.0),
 }
+# waist yaw (2026-10-25, user): the upper body turns +-45 deg on the pelvis; servo fixed in the pelvis
+# above the hip servos, shaft up, horn under the torso; the pivot bearing carries the upper body
+WAIST_STOPS = {"waist_yaw": (-50.0, 50.0)}
+# optional hip roll (BipedParams.hip_roll): servo in the pelvis, shaft forward; it tilts the whole leg
+# sideways so the pelvis can move over the stance foot without tilting the robot
+HIP_ROLL_STOPS = {"hip_roll": (-30.0, 30.0)}
 SERVO_HALF_MM = (6.1, 11.8, 11.5)        # SG90 body: 12.2 x 23.6 x 23 mm, shaft along Y (pitch)
 # The shoulder roll servo hangs body-down inside the upper arm, slid forward along its shaft so its
 # holder is centred in the arm; its horn + bearing stack (along X) is then centred this far forward.
@@ -65,11 +71,12 @@ SERVOS = {
 
 
 @dataclass(frozen=True)
-class TorsoPart:
-    """Something carried inside the torso frame: a box in its own axes (length, width, thickness),
-    plus envelopes kept free for what plugs into it. An envelope listed in `access` must reach the
-    torso wall (a cable plugged from outside: USB, switch). Sizes are catalogue values — measure
-    the real part and update."""
+class CarriedPart:
+    """Something carried inside the torso or pelvis frame (`seat`): a box in its own axes (length,
+    width, thickness), plus envelopes kept free for what plugs into it. An envelope listed in
+    `access` must reach the wall (a cable plugged from outside: USB, switch). Sizes are catalogue
+    values — measure the real part and update."""
+    seat: str                  # "torso" or "pelvis"
     label: str
     size_mm: tuple
     mass_g: float
@@ -79,39 +86,56 @@ class TorsoPart:
     flat: bool = False         # thickness must stay vertical (the IMU)
 
 
-# What the torso carries (2026-10-24). Positions: TORSO_LAYOUT, found by sim/tools/torso_layout.py.
-TORSO_PARTS = {
+# What the body carries. Split decided 2026-10-25 (user): the ESP32 rides in the torso and drives the
+# 8 arm servos directly (LEDC); the pelvis holds the power, the IMU (fixed to the legs, the torso turns)
+# and a PCA9685 for the 8 leg servos + the waist servo. Only the servo 5 V rail, the logic 5 V and
+# I2C cross the waist — no servo cable does. Torso positions: TORSO_LAYOUT (sim/tools/torso_layout.py).
+BODY_PARTS = {
     # 2026-10-25 (user): two packs to test, same XT30 + JST-XH balance plug; the bay is the LiPo's,
     # which also holds the 2S1P 14500 pack (~28 x 14 x 51 mm, ~53 g) — mass kept at the heavier one
-    "bateria": TorsoPart("bateria 2S: LiPo 800 mAh ou 2S1P 14500", (56.0, 31.0, 17.0), 55.0,
+    "bateria": CarriedPart("pelvis", "bateria 2S: LiPo 800 mAh ou 2S1P 14500", (56.0, 31.0, 17.0), 55.0,
                          "Gens Ace 2S 800 mAh: 55 × 30 × 16 mm, 50 g + cabos e XT30; 2S1P 14500 cabe no mesmo vão",
-                         envelopes=(((34.0, 0.0, 0.0), (6.0, 12.0, 7.0)),)),          # leads at one end
+                         # leads at one end; the other end slides out through a drawer door in the back
+                         # of the pelvis cover (2026-10-25, user: swap and maintenance without opening the pelvis)
+                         envelopes=(((34.0, 0.0, 0.0), (6.0, 12.0, 7.0)), ((-29.0, 0.0, 0.0), (1.0, 15.5, 8.5))),
+                         access=(1,)),
     # 2026-10-25 (user): servo rail and logic on separate regulators; docs/alimentacao.md
-    "regulador": TorsoPart("regulador dos servos 5 V 15 A (Pololu D24V150F5)", (43.2, 31.8, 11.0), 10.0,
+    "regulador": CarriedPart("pelvis", "regulador dos servos 5 V 15 A (Pololu D24V150F5)", (43.2, 31.8, 11.0), 10.0,
                            "Pololu D24V150F5: 43,2 × 31,8 × 11 mm; massa não informada, 10 g estimado — pesar",
                            envelopes=(((26.6, 0.0, 0.0), (5.0, 10.0, 5.5)),)),       # wires at one end
-    "regulador_logica": TorsoPart("regulador da lógica 5 V 1 A (Pololu D24V10F5)", (18.0, 13.0, 3.5), 1.0,
+    "regulador_logica": CarriedPart("pelvis", "regulador da lógica 5 V 1 A (Pololu D24V10F5)", (18.0, 13.0, 3.5), 1.0,
                                   "Pololu D24V10F5: 18 × 13 × 3,5 mm; massa não informada, 1 g estimado — pesar",
                                   envelopes=(((12.0, 0.0, 0.0), (3.0, 5.0, 3.0)),)),  # wires at one end
-    "controle": TorsoPart("ESP32 DevKit em placa perfurada", (56.0, 34.0, 16.0), 18.0,
+    "controle": CarriedPart("torso", "ESP32 DevKit em placa perfurada", (56.0, 34.0, 16.0), 18.0,
                           "ESP32 DevKit V1 51,8 × 28,2 mm em barra fêmea sobre placa 56 × 34 mm",
                           envelopes=(((-35.0, 0.0, 4.0), (7.0, 6.0, 5.0)),), access=(0,)),   # USB plug
-    "pca9685": TorsoPart("PCA9685 (16 servos)", (62.5, 25.4, 11.0), 9.0,
+    "pca9685": CarriedPart("pelvis", "PCA9685 (8 servos das pernas + cintura)", (62.5, 25.4, 11.0), 9.0,
                          "Adafruit PCA9685: 62,5 × 25,4 mm; bornes ~10 mm de altura",
                          envelopes=(((0.0, 23.7, 0.0), (31.25, 11.0, 5.5)),)),       # 16 plugs, right-angle headers
-    "distribuicao": TorsoPart("placa de força", (45.0, 30.0, 14.0), 15.0,
+    "distribuicao": CarriedPart("pelvis", "placa de força", (45.0, 30.0, 14.0), 15.0,
                               "capacitores 2 × 1000 µF deitados, fusível 7,5 A retardado, divisor da bateria, buzzer, XT30 (estimado)"),
-    "mpu6050": TorsoPart("MPU-6050 (GY-521)", (21.0, 16.0, 5.0), 2.0, "GY-521: 21 × 16 mm", flat=True),
-    "chave": TorsoPart("chave liga/desliga", (21.0, 15.0, 18.0), 4.0, "rocker mini 21 × 15 mm, 18 mm de corpo",
+    "mpu6050": CarriedPart("pelvis", "MPU-6050 (GY-521)", (21.0, 16.0, 5.0), 2.0, "GY-521: 21 × 16 mm", flat=True),
+    "chave": CarriedPart("pelvis", "chave liga/desliga", (21.0, 15.0, 18.0), 4.0, "rocker mini 21 × 15 mm, 18 mm de corpo",
                        envelopes=(((0.0, 0.0, -10.0), (10.5, 7.5, 1.0)),), access=(0,)),  # button face on the cover
 }
-TORSO_WIRING_G = 8.0           # power leads, I2C, signal wires inside the torso (servo cables count with the servos)
+WIRING_G = {"torso": 3.0, "pelvis": 6.0}   # power leads, I2C, signals (servo cables count with the servos)
 # name -> (centre xyz mm in the torso frame, rotation: rows = torso axes, columns = part length/width/thickness)
-TORSO_LAYOUT = {}
+TORSO_LAYOUT = {                 # torso_layout.py --search, 2026-10-25
+    "controle": ((-5.0, 9.0, -10.5), ((0, 1, 0), (1, 0, 0), (0, 0, -1))),
+}
+PELVIS_LAYOUT = {                # torso_layout.py --seat pelvis --search, 2026-10-25
+    "pca9685": ((-30.0, -13.0, 11.0), ((0, 0, 1), (-1, 0, 0), (0, -1, 0))),
+    "bateria": ((-6.0, 28.0, 8.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
+    "regulador": ((14.0, -38.0, 8.0), ((-1, 0, 0), (0, 0, 1), (0, 1, 0))),
+    "distribuicao": ((12.0, -24.0, 8.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
+    "chave": ((-26.0, 34.0, -16.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
+    "mpu6050": ((18.0, 0.0, -14.0), ((0, 1, 0), (1, 0, 0), (0, 0, -1))),
+    "regulador_logica": ((32.0, -34.0, -16.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
+}
 
 
 def _all_sg90() -> dict:
-    return {j: "sg90" for j in (*JOINT_STOPS, *ARM_STOPS)}
+    return {j: "sg90" for j in (*JOINT_STOPS, *ARM_STOPS, *WAIST_STOPS, *HIP_ROLL_STOPS)}
 
 
 @dataclass(frozen=True)
@@ -123,14 +147,28 @@ class BipedParams:
     roll_to_sole_mm: float = 14.0   # ankle roll axis -> bottom of the sole
     hip_half_width_mm: float = 25.0  # torso centre -> each hip (50 mm between legs; legs are ~42 mm wide)
     leg_width_mm: float = 42.0      # along the pitch axes: horn + servo + bearing stack
-    hip_drop_mm: float = 10.0       # torso bottom -> hip pitch axis
+    hip_drop_mm: float = 10.0       # pelvis bottom -> hip pitch axis
+
+    # Pelvis (2026-10-25): carries the 2 hip pitch servos and the legs; the torso turns on it about
+    # the waist yaw axis. Box x depth, z height (mm); its width is the two hip servo stacks.
+    # 2026-10-25: holds the power, IMU and leg PCA9685 (BODY_PARTS seat "pelvis", PELVIS_LAYOUT) with
+    # the waist servo stacked over the hip servos (they reach 16 mm above the pelvis bottom); 76 x 52 is
+    # the smallest box where the layout search fits everything (60 x 38 was wished for the torques)
+    pelvis_depth_mm: float = 76.0
+    pelvis_height_mm: float = 52.0
+    waist_pivot_g: float = 8.0      # nominal: bearing + pin of the waist yaw pivot (to choose)
+    hip_roll: bool = False          # hip roll servo per leg (not approved; studied 2026-10-25)
+    hip_roll_link_mm: float = 22.0  # hip roll axis -> hip pitch axis (like the ankle block)
+    hip_roll_struct_g: float = 6.0
 
     # Torso frame (the skeleton box, x depth, y width, z height, mm) and what it carries (g)
     # Proportions approved 2026-10-24 (Alpha 1 look with SG90, docs/arquitetura_corpo.md): torso 68 mm,
     # 86 mm at the shoulders, big head -> head / torso / legs = 20 / 31 / 50 % of 254 mm
     # 2026-10-25: 76 deep and 78 at the hips (was 50 x 70) so the electronics fit between the 4 torso
     # servos (sim/tools/torso_layout.py); a mild V from the shoulders down, chosen by the user
-    torso_size_mm: tuple = (76.0, 78.0, 68.0)
+    # 2026-10-25: 50 x 78 x 45 once the electronics went to the pelvis (only the ESP32 and the shoulder
+    # servos stay); the V shape is still open (docs/plano_correcoes_tronco.md 0.2)
+    torso_size_mm: tuple = (50.0, 78.0, 45.0)
     torso_top_width_mm: float = 86.0  # frame width at the shoulders
     shoulder_pitch_body: str = "front"  # shoulder pitch servo body lies "back" / "front" / "down" from its shaft
     torso_struct_g_per_cm2: float = 25.0 / 178.0   # frame plates: 25 g on a 50 x 70 x 45 mm frame (scaled by area)
@@ -163,7 +201,7 @@ class BipedParams:
     arm_leg_gap_mm: float = 3.0     # sideways clearance between an arm cover and the torso / leg cover
 
     # Covers (snap-fit shells, docs/capas.md)
-    shell_mm: float = 1.2           # wall thickness
+    shell_mm: float = 0.8           # wall thickness: 0.8 mm (2 PETG perimeters) since 2026-10-25, was 1.2 — -68 g
     shell_extra: float = 0.15       # clips, locating pins, ribs: fraction of the shell mass
     cover_scale: float = 1.0        # F2 "heavy covers" multiplies every cover mass
     cover_gap_mm: float = 1.0       # air between the skeleton and the inside of a cover
@@ -182,8 +220,27 @@ class BipedParams:
     @property
     def stand_height_mm(self) -> float:
         """Torso centre height when standing straight with flat feet on the floor."""
-        return (self.torso_size_mm[2] / 2 + self.hip_drop_mm + self.thigh_mm + self.shin_mm
-                + self.ankle_link_mm + self.roll_to_sole_mm)
+        return (self.torso_size_mm[2] / 2 + self.pelvis_height_mm + self.hip_drop_mm + self.hip_link_mm
+                + self.thigh_mm + self.shin_mm + self.ankle_link_mm + self.roll_to_sole_mm)
+
+    @property
+    def hip_link_mm(self) -> float:
+        """Hip roll axis -> hip pitch axis (0 without hip roll)."""
+        return self.hip_roll_link_mm if self.hip_roll else 0.0
+
+    @property
+    def leg_stops(self) -> dict:
+        """Joint stops of one leg, top to bottom."""
+        return dict(HIP_ROLL_STOPS, **JOINT_STOPS) if self.hip_roll else dict(JOINT_STOPS)
+
+    @property
+    def pelvis_width_mm(self) -> float:
+        return 2 * self.hip_half_width_mm + self.leg_width_mm
+
+    @property
+    def hip_z_mm(self) -> float:
+        """Hip pitch axes height in the torso frame (waist yaw at zero)."""
+        return -self.torso_size_mm[2] / 2 - self.pelvis_height_mm - self.hip_drop_mm - self.hip_link_mm
 
     @property
     def total_height_mm(self) -> float:
@@ -236,7 +293,7 @@ class BipedParams:
         """Arm axis distance from the centre line: every hanging arm piece clears what is beside it —
         the torso cover over its whole height, and the leg cover where it reaches below the hips."""
         g, zs = self.arm_leg_gap_mm, self.shoulder_z_mm
-        hip = -self.torso_size_mm[2] / 2 - self.hip_drop_mm
+        hip = self.hip_z_mm
         thigh_top = hip - self.thigh_mm * (1 - self.leg_cover_fraction) / 2
         leg_out = self.hip_half_width_mm + self.leg_cover_half_mm[1]
         elbow, wrist = zs - self.upper_arm_mm, zs - self.upper_arm_mm - self.forearm_mm
@@ -263,15 +320,20 @@ class BipedParams:
 
     # ------------------------------------------------------------------ masses
     @property
-    def torso_contents_g(self) -> float:
-        """Battery, boards, regulator, switch and wiring (TORSO_PARTS)."""
-        return sum(part.mass_g for part in TORSO_PARTS.values()) + TORSO_WIRING_G
+    def contents_g(self) -> dict:
+        """Mass of what each segment carries (BODY_PARTS + wiring), g: {"torso": .., "pelvis": ..}."""
+        return {seat: sum(q.mass_g for q in BODY_PARTS.values() if q.seat == seat) + w for seat, w in WIRING_G.items()}
 
     @property
     def torso_struct_g(self) -> float:
         x, y, z = self.torso_size_mm
         y = (y + self.torso_top_width_mm) / 2
         return self.torso_struct_g_per_cm2 * 2 * (x * y + x * z + y * z) / 100
+
+    @property
+    def pelvis_struct_g(self) -> float:
+        x, y, z = self.pelvis_depth_mm, self.pelvis_width_mm, self.pelvis_height_mm
+        return self.torso_struct_g_per_cm2 * 2 * (x * y + x * z + y * z) / 100 + self.waist_pivot_g
 
     @property
     def covers_g(self) -> dict:
@@ -297,14 +359,16 @@ class BipedParams:
 
     @property
     def servo_count(self) -> int:
-        return 2 * (len(JOINT_STOPS) + (len(ARM_STOPS) if self.arms else 0))
+        return 2 * (len(self.leg_stops) + (len(ARM_STOPS) if self.arms else 0)) + len(WAIST_STOPS)
 
     @property
     def total_mass_g(self) -> float:
         c = self.covers_g
-        torso = self.torso_contents_g + self.torso_struct_g + c["torso"]
+        torso = (sum(self.contents_g.values()) + self.torso_struct_g + c["torso"] + self.servo("waist_yaw").mass_g
+                 + self.pelvis_struct_g + c["pelvis"])
         leg = (self.thigh_struct_g + self.shin_struct_g + self.ankle_struct_g + self.foot_struct_g
-               + c["thigh"] + c["shin"] + c["ankle"] + sum(self.servo(j).mass_g for j in JOINT_STOPS))
+               + c["thigh"] + c["shin"] + c["ankle"] + sum(self.servo(j).mass_g for j in self.leg_stops)
+               + (self.hip_roll_struct_g if self.hip_roll else 0.0))
         head = (self.ultrasonic_g + self.camera_reserve_g + c["head"]) if self.head else 0.0
         arm = (self.upper_arm_struct_g + self.forearm_struct_g + self.hand_struct_g
                + c["shoulder"] + c["upper_arm"] + c["forearm"] + c["wrist"] + c["hand"]
@@ -381,6 +445,10 @@ def shells(p: BipedParams) -> dict:
         (-tz / 2 - 2, hx * 0.95, hy_bottom),
         (tz / 2, hx, hy_top),
         (tz / 2 + 6, hx * 0.8, hy_top * 0.8)), p.cover_corner_n, cap_top=True)
+    # pelvis: around the hip servo bodies (y out to the hip stacks), mounted in the pelvis body
+    px, py = p.cover_half_mm(p.pelvis_depth_mm / 2), p.cover_half_mm(p.pelvis_width_mm / 2)
+    out["pelvis"] = Shell("pelvis", (0, 0, 0), ((-p.pelvis_height_mm / 2 - 2, px, py),
+                                               (p.pelvis_height_mm / 2, px, py)), p.cover_corner_n)
     if p.head:
         ex, ey, ez = (v / 2 for v in p.head_size_mm)
         levels = [math.sin(math.pi * (i / 12 - 0.5)) for i in range(13)]
