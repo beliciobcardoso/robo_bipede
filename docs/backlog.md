@@ -44,7 +44,7 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Rolamentos 623ZZ chegarem (já comprados) **(você)**
 - [ ] Impressora 3D **(você)**
 - [ ] Filamento PETG **(você)**
-- [ ] Regulador dos servos: UBEC 5 V / 7 A genérico, R$ 59 — escolhido em 25/10 no lugar do D24V150F5, por custo ([alimentacao.md](alimentacao.md)) **(você)**
+- [ ] Regulador dos servos: UBEC 5 V / 7 A genérico, R$ 59 — **comprado em 25/10, aguardando entrega**; escolhido no lugar do D24V150F5, por custo ([alimentacao.md](alimentacao.md)) **(você)**
 - [ ] Regulador da lógica Pololu D24V10F5 (5 V, 1 A) — ESP32 fora do trilho dos servos, decidido em 25/10 **(você)**
 - [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
 - [ ] Pack 2S1P 14500 alta descarga com BMS — testar contra a LiPo; os dois com XT30 + JST-XH 3 pinos (25/10) **(você)**
