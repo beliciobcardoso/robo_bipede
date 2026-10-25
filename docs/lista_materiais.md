@@ -7,17 +7,18 @@ pela forma, tronco em V — 25/10). **SG90 em todas as juntas** (decisão de
 24/10): joelho e tornozelo roll ficam no limite a 1 passo/s e com folga a 0,5 passo/s — ver
 [arquitetura_corpo.md](arquitetura_corpo.md).
 
-> **Configuração: 16 servos SG90** — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll;
+> **Configuração: 17 servos SG90** (16 + 1 na cintura, 25/10) — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll;
 > por braço: ombro pitch, ombro roll, cotovelo, punho (gira). Mão fixa. Cabeça fixa com o sensor
 > ultrassônico (aprovado em 24/10).
 
 
 ## Atuadores
 
-- [X] **Servo SG90 (clone)** — 8 — juntas das pernas
+- [ ] **Servo SG90 (clone)** — 8 — juntas das pernas (você tem 4 em mãos, 25/10)
 - [ ] **Servo SG90 (clone) para os braços** — 8 — ombro pitch, ombro roll, cotovelo e punho de cada
   braço; comprar também reservas novas (as atuais não devem virar servo de braço)
-- [X] **Servo SG90 reserva** — 2 a 4 — engrenagem plástica de clone espana; ter reserva evita parar o projeto
+- [ ] **Servo SG90 (clone) para a cintura** — 1 — gira o tronco ±45° sobre o quadril (decidido em 25/10)
+- [ ] **Servo SG90 reserva** — 2 a 4 — engrenagem plástica de clone espana; ter reserva evita parar o projeto
 - [X] **Horns** (braço simples e cruz) — vêm com o servo — fixação no eixo
 - [X] **Parafusos do servo** (abas + horn) — vêm com o servo
 
@@ -42,7 +43,7 @@ INA219 na F3.
   2× 18650 de ~95 g tiram a margem do tornozelo roll). Se o que você tem são 18650, desmarque e compre a LiPo
 - [ ] **Pack 2S1P 14500 alta descarga (IMR), soldado a ponto** — 1 — para testar contra a LiPo (25/10); células sem proteção interna, marca com teste publicado, ≥ 5 A contínuos, 700–800 mAh reais (ignorar "1200 mAh")
 - [X] **BMS 2S** — 1 — no pack 2S1P 14500: com balanceamento, sobrecorrente ≥ 8–10 A
-- [ ] **Regulador dos servos Pololu D24V150F5 (5 V, 15 A)** — 1 — trilho único dos 16 servos (trilho separado para os braços não compensa a fiação extra); decidido em 25/10 no lugar do UBEC e do D24V90F5 ([alimentacao.md](alimentacao.md))
+- [ ] **Regulador dos servos: UBEC 5 V / 7 A genérico (2S–6S, 16 g)** **(comprado em 25/10, aguardando entrega)** — 1 — [anúncio de R$ 59](https://www.mercadolivre.com.br/ubec-5v-7a-de-2s-a-6s-p-drone-automodelo-ou-aeromodelo/up/MLBU3810590864); trocado do Pololu D24V150F5 por custo (25/10) — trilho único dos 16 servos (trilho separado para os braços não compensa a fiação extra); decidido em 25/10 no lugar do UBEC e do D24V90F5 ([alimentacao.md](alimentacao.md))
 - [ ] **Regulador da lógica Pololu D24V10F5 (5 V, 1 A)** — 1 — ESP32, PCA9685 (lógica), MPU-6050 e HC-SR04 direto da bateria, fora do trilho dos servos: um stall derruba o trilho sem reiniciar o ESP32 (decidido em 25/10). Não tem proteção contra inversão — fica depois da chave e do conector polarizado
 - [X] **Capacitor eletrolítico 470–1000 µF / 16 V** — 2 — junto ao trilho dos servos, segura queda nos picos
 - [X] **Chave liga/desliga ≥ 5 A** — 1 — fica do lado da bateria, junto do fusível: conferir se aguenta 7,5 A
@@ -70,7 +71,7 @@ INA219 na F3.
 - [ ] **Porcas M3 autotravantes (nylon)** — pivôs não soltam com vibração
 - [ ] **Arruelas M3**
 - [ ] **Parafusos M2** (6, 8 mm) + porcas — fixações pequenas
-- [ ] **Insertos roscados M2/M3 a quente** **(opcional)** — rosca durável no plástico
+- [ ] **Insertos roscados M2/M3 a quente** **(comprado em 25/10, aguardando entrega)** — kit de 400: M2 × 2–6 mm (OD 3,5) e M3 × 3–8 mm (OD 4,2) — necessário: pino do pivô e união suporte + garfo (M3), placas (M2); furo conforme o vendedor (~4,0 mm para OD 4,2), parede ≥ 1,5–2 mm em volta
 - [ ] **Borracha antiderrapante para a sola** — 2 — EVA, borracha de câmara ou TPU impresso
 
 ## Ferramentas
