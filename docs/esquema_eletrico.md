@@ -16,7 +16,7 @@ script, rode de novo e atualize a tabela.
 |---|---|---|
 | Bateria 2S → fusível → chave | XT30, fio 18–20 AWG | fusível de 7,5 A, ação retardada |
 | Chave → UBEC 5 V / 7 A → trilho dos servos | 5,25 V, fio 20 AWG | 2 × 1000 µF no trilho, perto do PCA9685 |
-| Chave → D24V10F5 → 5 V lógica | ESP32 (VIN) e HC-SR04 | o D24V10F5 não tem proteção contra inversão: fica depois da chave |
+| Chave → MP1584EN → 5 V lógica | ESP32 (VIN) e HC-SR04 | ajustar em 5,0 V antes de ligar e travar o trimpot; sem proteção contra inversão: fica depois da chave |
 | Chave → divisor 100 k / 33 k → VBAT | 8,4 V → 2,08 V no ADC | ADC1 (GPIO35), atenuação de 11 dB |
 | ESP32 3V3 → PCA9685 VCC e MPU VCC | 3,3 V | os pull-ups de I2C das placas ficam em 3,3 V; os pinos do ESP32 não toleram 5 V |
 
@@ -26,7 +26,7 @@ script, rode de novo e atualize a tabela.
 |---|---|---|
 | Trilho dos servos 5,25 V | UBEC (quadril) → 8 servos dos braços (tronco) | 20 AWG |
 | GND | barramento comum | 20 AWG |
-| 5 V lógica | D24V10F5 → ESP32 VIN, HC-SR04 | fino |
+| 5 V lógica | MP1584EN → ESP32 VIN, HC-SR04 | fino |
 | 3,3 V | ESP32 → PCA9685 VCC, MPU | fino |
 | SDA, SCL | ESP32 ↔ PCA9685, MPU | fino, trançados |
 | VBAT (sinal) | divisor → GPIO35 | fino |

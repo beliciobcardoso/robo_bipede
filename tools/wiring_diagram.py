@@ -17,7 +17,7 @@ OUT = Path(__file__).resolve().parents[1] / "docs" / "img" / "esquema_eletrico"
 
 # wire colours
 SERVO = "#d62728"     # servo rail 5.25 V (UBEC)
-LOGIC = "#ff7f0e"     # 5 V logic (D24V10F5)
+LOGIC = "#ff7f0e"     # 5 V logic (MP1584EN)
 V33 = "#bcbd22"       # 3.3 V from the ESP32
 I2C = "#1f77b4"
 SIG = "#2ca02c"       # PWM / sensor signals
@@ -109,7 +109,7 @@ def main():
     wire(ax, [(46, 19), (46, 7), (49, 7)], BAT, 1.2)
     box(ax, 49, 31, 63, 42, "UBEC 5 V / 7 A", ("entrada 5,5–26 V", "saída 5,25 V", "trilho dos 17 servos"), fc="#fbe3e3")
     wire(ax, [(46, 36.5), (49, 36.5)], BAT, 2.6)
-    box(ax, 49, 14, 63, 24, "D24V10F5", ("5 V / 1 A lógica", "sem prot. inversão:", "depois da chave"), fc="#fdebd3")
+    box(ax, 49, 14, 63, 24, "MP1584EN", ("5,0 V lógica (ajustar", "e travar o trimpot);", "depois da chave"), fc="#fdebd3")
     box(ax, 49, 3, 63, 11, "Divisor VBAT", ("100 k / 33 k", "8,4 V → 2,1 V"), fc="#ece2f6", size=7.5)
     wire(ax, [(63, 7), (96, 7), (96, 9)], BAT, 1.2)
     # servo rail and caps

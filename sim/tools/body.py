@@ -104,9 +104,10 @@ BODY_PARTS = {
     "regulador": CarriedPart("pelvis", "UBEC 5 V 7 A (genérico, 2S–6S)", (58.0, 28.0, 6.0), 16.0,
                            "UBEC 5,25 V / 7 A, entrada 5,5–26 V, 16 g (anúncio); 58 × 28 × 6 mm de um modelo igual — medir",
                            envelopes=(((34.0, 0.0, 0.0), (5.0, 10.0, 4.0)),)),       # wires at one end
-    "regulador_logica": CarriedPart("pelvis", "regulador da lógica 5 V 1 A (Pololu D24V10F5)", (18.0, 13.0, 3.5), 1.0,
-                                  "Pololu D24V10F5: 18 × 13 × 3,5 mm; massa não informada, 1 g estimado — pesar",
-                                  envelopes=(((12.0, 0.0, 0.0), (3.0, 5.0, 3.0)),)),  # wires at one end
+    # 2026-10-25 (user): MP1584EN buck module (3 A, adjustable, set to 5.0 V) instead of the Pololu D24V10F5
+    "regulador_logica": CarriedPart("pelvis", "regulador da lógica MP1584EN (3 A, ajustado em 5,0 V)", (22.0, 17.0, 4.0), 2.0,
+                                    "módulo MP1584EN: ~22 × 17 × 4 mm, ~2 g (típico) — medir",
+                                    envelopes=(((14.0, 0.0, 0.0), (3.0, 6.0, 3.0)),)),  # wires at one end
     "controle": CarriedPart("torso", "ESP32 DevKit em placa perfurada", (56.0, 34.0, 16.0), 18.0,
                           "ESP32 DevKit V1 51,8 × 28,2 mm em barra fêmea sobre placa 56 × 34 mm",
                           envelopes=(((-35.0, 0.0, 4.0), (7.0, 6.0, 5.0)),), access=(0,)),   # USB plug
@@ -131,7 +132,7 @@ PELVIS_LAYOUT = {                # torso_layout.py --seat pelvis --search, 2026-
     "distribuicao": ((28.0, -28.0, 0.0), ((0, 0, 1), (0, 1, 0), (-1, 0, 0))),
     "chave": ((26.0, 26.0, -16.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
     "mpu6050": ((0.0, -18.0, -6.0), ((1, 0, 0), (0, 1, 0), (0, 0, 1))),
-    "regulador_logica": ((-32.0, 28.0, -18.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
+    "regulador_logica": ((32.0, 12.0, 12.0), ((0, 0, 1), (0, 1, 0), (-1, 0, 0))),
 }
 
 
