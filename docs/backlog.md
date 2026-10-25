@@ -25,11 +25,13 @@ Documentos de apoio: [corpo inteiro](arquitetura_corpo.md) · [prévia 3D](previ
 
 ## Decisão agora
 
-- [x] Servos: **SG90 em todas as 12 juntas** — decidido em 24/10 **(você)**
+- [x] Servos: **SG90 em todas as juntas** — decidido em 24/10 (hoje 17: 8 nas pernas, 8 nos braços, 1 na cintura) **(você)**
 - [x] Proporção do corpo: tronco 68 mm, ombros 86 mm, cabeça grande, parede 1,2 mm — decidido em 24/10 ([arquitetura_corpo.md](arquitetura_corpo.md)) **(você)**
 - [x] Aplicada em `sim/tools/body.py`; prévia, F1 e documentos refeitos: 254 mm, 518 g, ritmo com folga até ~0,7 passo/s **(Claude)**
 - [x] Braço com cotovelo e punho que gira, mão fixa (4 SG90 por braço, 16 no total) — decidido em 24/10 **(você)**; cadeia modelada pelas marcações das 8 cabeças, simulado: 573 g, ritmo até ~0,67 passo/s ([arquitetura_corpo.md](arquitetura_corpo.md)) **(Claude)**
 - [x] Forma das capas: quase retas — ombros 18,2 cm, 569 g — decidido em 24/10 **(você)**
+
+- [ ] Correções do tronco, do regulador e dos documentos — tarefas em [plano_correcoes_tronco.md](plano_correcoes_tronco.md) **(juntos)**
 
 ## Sempre
 
@@ -42,12 +44,15 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Rolamentos 623ZZ chegarem (já comprados) **(você)**
 - [ ] Impressora 3D **(você)**
 - [ ] Filamento PETG **(você)**
-- [ ] UBEC 5–6 V ≥ 10 A (16 servos) **(você)**
+- [ ] Regulador dos servos Pololu D24V150F5 (5 V, 15 A) — decidido em 25/10 ([alimentacao.md](alimentacao.md)) **(você)**
+- [ ] Regulador da lógica Pololu D24V10F5 (5 V, 1 A) — ESP32 fora do trilho dos servos, decidido em 25/10 **(você)**
 - [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
+- [ ] Pack 2S1P 14500 alta descarga com BMS — testar contra a LiPo; os dois com XT30 + JST-XH 3 pinos (25/10) **(você)**
+- [ ] Comparar as duas baterias na bancada: queda de tensão a 5–6 A, autonomia, temperatura; escolher uma **(juntos)**
 - [ ] 8 servos SG90 para os braços + reservas novas **(você)**
-- [ ] PCA9685 (16 canais de PWM; os 16 servos ocupariam todos os 16 canais do LEDC do ESP32) **(você)**
+- [ ] PCA9685 — no quadril, para os 8 servos das pernas + o da cintura; os 8 dos braços vão direto no LEDC do ESP32, no tronco (25/10) **(você)**
 - [ ] HC-SR04 **(você)**
-- [ ] Fusível ~10 A de ação retardada no lugar do de 5 A **(você)**
+- [ ] Fusível 7,5 A de ação retardada no lugar do de 5 A — decidido em 25/10 **(você)**
 - [ ] Parafusaria: M3 (8/10/12/16), porcas M3 autotravantes, arruelas M3, M2 (6/8) **(você)**
 - [ ] Borracha antiderrapante para a sola **(você)**
 - [ ] INA219 — necessário para a bancada do servo (F3) **(você)**
@@ -72,12 +77,14 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [ ] Rever a decisão dos 8 DOF se o tornozelo roll passar de ~70 % do SG90 no ritmo desejado, ou se a inclinação continuar acima de ~20° depois de afinar o quadril (F2) **(juntos)**
 - **F2 — Varredura na GPU**
   - [x] Varrer coxa/canela × largura do quadril × peso das capas → torque vs SG90, parado e em movimento — 360 robôs em `sim/tools/f2_sweep.py` **(Claude)**
-  - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`) **(juntos)**
+  - [x] Escolher as medidas da perna — **aprovadas em 24/10:** quadris 45 mm, coxa 45, canela 45, pé 40 × 70, capas meta 35 g / limite 50 g (`arquitetura_perna.md`); revistas pelo conceito do suporte para quadris 50 mm e pé 45 × 70 **(juntos)**
 - **F3 — Modelo do servo SG90**
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**
   - [ ] Firmware da bancada: degrau de posição, gravar posição e corrente **(juntos)**
   - [ ] Medir os 8 servos (+ reservas) e escolher os melhores para joelhos/tornozelos **(você)**
+  - [ ] Medir a corrente de stall real do clone e confirmar o regulador D24V150F5 ([alimentacao.md](alimentacao.md)); se passar bem de 0,75 A, rever a escolha **(você)**
   - [ ] Modelo do servo (torque × velocidade, folga, zona morta, atraso) calibrado **(Claude)**
+  - [ ] Simular degraus de posição sem rampa com o servo calibrado (o SG90 satura e puxa o stall): pico de torque e de corrente; refazer `current_budget.py` e conferir a margem do D24V150F5 ([alimentacao.md](alimentacao.md)) **(Claude)**
 - **F4 — Ponte CAD → simulação**
   - [ ] Script FreeCAD → modelo MuJoCo com massa, centro de massa e inércia de cada peça **(Claude)**
   - [ ] Conferir massa simulada × massa na balança **(você)**
@@ -89,6 +96,7 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [ ] Gravar ruído real do MPU-6050 parado e em movimento **(você)**
   - [ ] Filtro complementar → depois Kalman **(juntos)**
   - [ ] Controlador de tornozelo (PD → LQR) resistindo a empurrões simulados **(juntos)**
+  - [ ] Simular o controle de equilíbrio ativo na passada (correções rápidas + empurrões): pico de torque e de corrente; refazer `current_budget.py` — hoje a conta usa ×2 de margem por falta disso ([alimentacao.md](alimentacao.md)) **(Claude)**
 - **F7 — Andar por reforço (GPU)**
   - [ ] Treinar política no MJX com variações aleatórias (massa, folga, atrito) **(Claude)**
   - [ ] Comparar com a passada clássica (F5) em números **(juntos)**
@@ -133,10 +141,11 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 - [x] Definir o tipo de encaixe — **decidido em 24/10: clipe de pressão + 2 pinos-guia por capa**; ímã é o plano B ([capas.md](capas.md)) **(juntos)**
 - [x] Definir as dimensões do clipe e do pino-guia — **aprovadas em 24/10** ([capas.md](capas.md)) **(juntos)**
-- [ ] Confirmar parede da capa (1,2 mm) e encaixes por capa (2 clipes + 2 pinos; tronco 4 + 2) ao desenhar as capas **(juntos)**
+- [ ] Confirmar parede da capa (0,8 mm desde 25/10; resiste a queda? testar na peça de tolerância) e encaixes por capa (2 clipes + 2 pinos; tronco 4 + 2) ao desenhar as capas **(juntos)**
 - [x] Modelo de referência do encaixe padrão: `cad/parts/snap_clip.py` (capa) e `snap_socket.py` (esqueleto), com checagem do encaixe montado **(Claude)**
 - [ ] Orçamento de massa das capas — elas pesam e entram na conta de torque (F2/F4) **(juntos)**
-- [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga da bateria, troca de servo, calibração **(juntos)**
+- [ ] Gaveta da bateria pela traseira do quadril, com tampa de encaixe própria: troca em ~10 s sem abrir o quadril; plug de balanceamento (JST-XH) acessível para carregar sem tirar a bateria — decidido em 25/10 **(você)**
+- [ ] Lista de acessos que as capas **não** podem fechar: USB do ESP32, chave liga/desliga, carga e troca da bateria (gaveta traseira do quadril), troca de servo, calibração **(juntos)**
 - [ ] Caminho dos fios por dentro das capas sem prender as juntas em nenhuma posição **(juntos)**
 - [ ] Ventilação: saída de ar para o regulador buck e os servos **(juntos)**
 - [ ] Capas da perna: coxa, canela, tornozelo e pé **(você)**
@@ -155,14 +164,15 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 ## 5. Eletrônica
 
-- [ ] Esquema elétrico: bateria → fusível → chave → UBEC → trilho dos 16 servos; ESP32 + PCA9685 (I2C); MPU; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
+- [ ] Esquema elétrico ([alimentacao.md](alimentacao.md), divisão tronco/quadril): bateria → fusível 7,5 A → chave → D24V150F5 → trilho dos 17 servos (+ 2 × 1000 µF); bateria → D24V10F5 → ESP32 (tronco) + lógica do PCA9685 e MPU (quadril, I2C), HC-SR04, terra comum; pela cintura só trilho 5 V, 5 V da lógica e I2C; PG do D24V150F5 num pino do ESP32; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
 - [ ] Placa de distribuição em placa perfurada **(você)**
 - [ ] Teste com fonte de bancada limitando corrente, antes da bateria **(você)**
 - [ ] Fiação no robô com extensões e organização dos cabos **(você)**
 
 ## 6. Firmware (ESP32)
 
-- [ ] PWM dos 16 servos pelo PCA9685 (I2C) **(juntos)**
+- [ ] PWM: 8 servos das pernas + cintura pelo PCA9685 (I2C, quadril); 8 servos dos braços pelo LEDC do ESP32 (tronco) **(juntos)**
+- [ ] Ligar escalonado: PCA9685 com OE desligado e saídas LEDC paradas até a 1ª posição; servos ligados em grupos de 2 a 4, ~150 ms entre grupos (sem isso, ~12 A ao ligar — [alimentacao.md](alimentacao.md)) **(juntos)**
 - [ ] Leitura do HC-SR04: distância à frente, parar antes de obstáculo **(juntos)**
 - [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
 - [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**

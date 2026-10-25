@@ -1,11 +1,14 @@
 """Lateral rocking test: shift the body from one foot to the other at walking pace (open loop).
 
-    .venv/bin/python sim/tools/rocking_test.py [--model f1] [--tilt 18] [--cycles 4]
+    .venv/bin/python sim/tools/rocking_test.py [--model f1] [--tilt 9] [--cycles 4] [--arm 60]
 
 With no hip roll, the weight moves sideways by tilting the whole body over the stance foot with
 both ankle rolls (feet kept parallel to the floor). One cycle = shift onto the left foot, lift and
 lower the right foot, shift back, then the same to the right. To break the left/right symmetry
 while shifting, the leg on the far side extends a little (pushes the body over).
+
+--arm opens one arm sideways by that many degrees, following the shift, as a counterweight:
+the free-leg side (opposite the stance leg, default) or, with --arm-side stance, the stance side.
 
 No balance feedback: if a pace only works with feedback, it falls here — that tells us what the
 IMU controller (F6) will have to do. Reports, per cycle period: how far the body tilts, how high
@@ -51,7 +54,7 @@ def targets(t: float, period: float, roll_max: float):
     return side * roll * roll_max, a
 
 
-def run(m, period: float, roll_max: float, cycles: int):
+def run(m, period: float, roll_max: float, cycles: int, arm: float = 0.0, arm_side: str = "free"):
     r = Robot(m)
     d = mujoco.MjData(m)
     # settle into the base crouch first
@@ -65,6 +68,11 @@ def run(m, period: float, roll_max: float, cycles: int):
     while d.time - t0 < cycles * period:
         roll, a = targets(d.time - t0, period, roll_max)
         d.ctrl[:] = r.ctrl(a, roll=roll)
+        if arm and roll_max:
+            stance = "l" if roll > 0 else "r"                     # roll > 0: stance on the left foot
+            side = stance if arm_side == "stance" else {"l": "r", "r": "l"}[stance]
+            i = r.idx[f"shoulder_roll_{side}"]
+            d.ctrl[i] = np.clip(arm * abs(roll) / roll_max, r.lo[i], r.hi[i])
         mujoco.mj_step(m, d)
         if d.time - t0 > period:                  # skip the first cycle's start-up transient
             peak = np.maximum(peak, np.abs(d.actuator_force))
@@ -80,7 +88,9 @@ def run(m, period: float, roll_max: float, cycles: int):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", default="f1")
-    ap.add_argument("--tilt", type=float, default=16.0, help="ankle roll amplitude, degrees")
+    ap.add_argument("--tilt", type=float, default=9.0, help="ankle roll amplitude, degrees (9: the 615 g robot shifts and lifts the foot)")
+    ap.add_argument("--arm", type=float, default=0.0, help="arm opening, degrees")
+    ap.add_argument("--arm-side", choices=("free", "stance"), default="free", help="which arm opens")
     ap.add_argument("--cycles", type=int, default=4)
     args = ap.parse_args()
     m = mujoco.MjModel.from_xml_path(str(MODELS.get(args.model, args.model)))
@@ -89,7 +99,7 @@ def main():
           f"{args.cycles} ciclos, massa {m.body_subtreemass[1] * 1000:.0f} g")
     print("  ciclo   passos/s  inclinação máx  pé livre sobe  caiu?   picos: quadril  joelho  tornozelo  tornoz.roll")
     for period in (6.0, 4.0, 3.0, 2.0, 1.5, 1.0):
-        res = run(m, period, roll, args.cycles)
+        res = run(m, period, roll, args.cycles, np.radians(args.arm), args.arm_side)
         steps = 2 / period
         if res["fell"]:
             print(f"  {period:4.1f} s   {steps:5.2f}        —              —        SIM (t={res['at']:.1f}s)")

@@ -72,7 +72,7 @@ vezes recomenda-se ficar abaixo de ~2 %. Força para dobrar a lingueta: ~4 N por
 
 | Medida | Valor inicial |
 |--------|---------------|
-| Parede da capa | 1,2 mm (3 voltas de bico 0,4 mm) |
+| Parede da capa | 0,8 mm (2 voltas de bico 0,4 mm) desde 25/10, para baixar o torque (era 1,2 mm, −68 g no robô); o clipe continua com 1,2 mm (região engrossada) |
 | Encaixes por capa pequena (coxa, canela, pé) | 2 clipes + 2 pinos-guia |
 | Encaixes por capa grande (tronco) | 4 clipes + 2 pinos-guia |
 

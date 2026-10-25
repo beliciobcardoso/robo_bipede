@@ -60,3 +60,4 @@ medida, uma peça ou o conceito do suporte — e registrar a mudança no histór
 | 24/10/2026 | Proporção estilo Alpha 1, SG90 em tudo: tronco 68 mm, ombros 86 mm (ombro pitch com 623ZZ), cabeça 52 × 58 × 48 mm, parede 1,2 mm → 254 mm, 518 g (capas 164 g), cabeça / tronco / pernas 20 / 31 / 50 % |
 | 24/10/2026 | Braços com cotovelo (servo no antebraço) e punho que gira (servo na mão), mão fixa → 16 servos; marcações das 8 cabeças; 573 g (capas 179 g), ombros 19,8 cm |
 | 24/10/2026 | Capas quase retas (seção com canto pouco arredondado): ombros 18,2 cm, 569 g (capas 175 g) |
+| 25/10/2026 | Quadril separado do tronco com a cintura girando ±45° (17º SG90 no quadril); eletrônica no quadril (gaveta da bateria atrás), ESP32 no tronco; capas de 0,8 mm; tronco em V (50 × 62 × 50 mm, ombros 96, peito/cintura 1,52); quadril 76 × 92 × 52 mm → 288 mm, 615 g (capas 133 g) |

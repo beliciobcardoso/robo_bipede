@@ -21,8 +21,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import body  # noqa: E402
 from body import (ARM_STOPS, ELBOW_STACK_CENTRE_MM, JOINT_STOPS, SERVO_HALF_MM, SERVOS,  # noqa: E402,F401
-                  SHOULDER_ROLL_STACK_X_MM, SOFT_MARGIN_DEG, WRIST_HOLDER_X_MM, BipedParams, shells)
+                  SHOULDER_ROLL_STACK_X_MM, SOFT_MARGIN_DEG, WAIST_STOPS, WRIST_HOLDER_X_MM, BipedParams, shells)
+from body import HIP_ROLL_STOPS  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "models" / "f1_biped.xml"
 PREVIEW_OUT = OUT.with_name("preview_biped.xml")
@@ -52,9 +54,9 @@ def _kg(g: float) -> str:
     return f"{g / 1000:.5f}"
 
 
-def _servo_geom(name: str, mass_g: float, z_mm: float, y_mm: float = 0.0) -> str:
+def _servo_geom(name: str, mass_g: float, z_mm: float, y_mm: float = 0.0, x_mm: float = 0.0) -> str:
     hx, hy, hz = SERVO_HALF_MM
-    return (f'<geom name="{name}" type="box" size="{_v(hx, hy, hz)}" pos="{_v(0, y_mm, z_mm)}" '
+    return (f'<geom name="{name}" type="box" size="{_v(hx, hy, hz)}" pos="{_v(x_mm, y_mm, z_mm)}" '
             f'mass="{_kg(mass_g)}" material="servo" class="visual"/>')
 
 
@@ -76,6 +78,7 @@ YOKE_BOXES = (((-12.75, 0.0, -3.25), (1.25, 8.0, 21.25)),    # base, beyond the 
               ((-4.25, 0.0, -22.0), (9.75, 6.0, 2.5)))       # arm with the bearing, 0.5 mm spacer gap
 BEARING_Z_MM = -23.5           # 4 mm bearing face at -19.5: holder floor -19 + 0.5 mm spacer
 HORN_TOP_MM = HORN_BOX[0][2] + HORN_BOX[1][2]
+WAIST_SERVO_Z_MM = 24.0        # waist yaw servo mass centre below the pelvis top (horn top on the top plane)
 SHOULDER_HORN_OUT_MM = 1.0     # shoulder pitch horn top beyond the torso frame side wall
 
 
@@ -88,6 +91,10 @@ def _servo_axes(joint: str, sign: int):
     elif joint in ("shoulder_pitch", "elbow"):      # shaft outward, body down
         xs, zs = (0, 0, -1), (0, sign, 0)
     elif joint == "wrist":                          # shaft up along the forearm, body front-back in the hand
+        xs, zs = (1, 0, 0), (0, 0, 1)
+    elif joint == "hip_roll":                       # shaft forward, body up into the pelvis
+        xs, zs = (0, 0, 1), (1, 0, 0)
+    elif joint == "waist_yaw":                      # shaft up under the torso, body forward in the pelvis
         xs, zs = (1, 0, 0), (0, 0, 1)
     else:                                           # leg pitch: shaft outward, body up
         xs, zs = (0, 0, 1), (0, sign, 0)
@@ -114,24 +121,32 @@ def _quat(xs, ys, zs) -> str:
     return " ".join(f"{c:.6f}" for c in q)
 
 
-def _place(joint: str, sign: int, at_mm, local_mm):
+def _shoulder_pitch_axes(p: BipedParams, sign: int):
+    """Shoulder pitch servo frame: shaft outward, body toward BipedParams.shoulder_pitch_body."""
+    xs = {"down": (0, 0, -1), "back": (-1, 0, 0), "front": (1, 0, 0)}[p.shoulder_pitch_body]
+    zs = (0, sign, 0)
+    ys = (zs[1] * xs[2] - zs[2] * xs[1], zs[2] * xs[0] - zs[0] * xs[2], zs[0] * xs[1] - zs[1] * xs[0])
+    return xs, ys, zs
+
+
+def _place(joint: str, sign: int, at_mm, local_mm, axes=None):
     """Body-frame position (mm) of a point given in the joint's servo frame."""
-    xs, ys, zs = _servo_axes(joint, sign)
+    xs, ys, zs = axes or _servo_axes(joint, sign)
     o = [at_mm[i] - STACK_CENTRE_MM * zs[i] for i in range(3)]
     return [o[i] + xs[i] * local_mm[0] + ys[i] * local_mm[1] + zs[i] * local_mm[2] for i in range(3)]
 
 
-def _vis(name, joint, sign, at_mm, centre, half=None, mesh=None, material="link") -> str:
-    q = _quat(*_servo_axes(joint, sign))
-    pos = _v(*_place(joint, sign, at_mm, centre))
+def _vis(name, joint, sign, at_mm, centre, half=None, mesh=None, material="link", axes=None) -> str:
+    q = _quat(*(axes or _servo_axes(joint, sign)))
+    pos = _v(*_place(joint, sign, at_mm, centre, axes))
     shape = f'type="mesh" mesh="{mesh}"' if mesh else f'type="box" size="{_v(*half)}"'
     return f'<geom name="{name}" {shape} pos="{pos}" quat="{q}" mass="0" material="{material}" class="visual"/>'
 
 
-def _servo_side(joint: str, sign: int, at_mm, s: str) -> str:
+def _servo_side(joint: str, sign: int, at_mm, s: str, axes=None) -> str:
     """Parent-body visuals of a joint: the servo and its holder."""
-    return (_vis(f"pv_servo_{joint}{s}", joint, sign, at_mm, (0, 0, 0), mesh="servo_sg90", material="servo_pv")
-            + _vis(f"pv_holder_{joint}{s}", joint, sign, at_mm, *HOLDER_BOX, material="holder"))
+    return (_vis(f"pv_servo_{joint}{s}", joint, sign, at_mm, (0, 0, 0), mesh="servo_sg90", material="servo_pv", axes=axes)
+            + _vis(f"pv_holder_{joint}{s}", joint, sign, at_mm, *HOLDER_BOX, material="holder", axes=axes))
 
 
 def _yoke_side(joint: str, sign: int, s: str, at=(0, 0, 0), bearing: bool = True) -> str:
@@ -158,17 +173,46 @@ def _cover_assets(p: BipedParams) -> str:
                    for n, sh in shells(p).items())
 
 
+PART_RGBA = {"bateria": "0.15 0.55 0.3 1", "ubec": "0.75 0.2 0.2 1", "pca9685": "0.15 0.25 0.6 1",
+             "controle": "0.1 0.3 0.15 1", "distribuicao": "0.55 0.45 0.1 1", "chave": "0.2 0.2 0.2 1",
+             "mpu6050": "0.6 0.1 0.6 1"}
+ENVELOPE_RGBA = "1 0.85 0.3 0.25"   # kept free for plugs, wires, USB
+
+
+def _parts_preview(layout: dict) -> list:
+    """Boxes of a segment's contents at their layout places (body.TORSO_LAYOUT / PELVIS_LAYOUT),
+    plus their keep-free envelopes."""
+    import numpy as np
+    out = []
+    for name, (centre, rot) in layout.items():
+        part, rot = body.BODY_PARTS[name], np.array(rot)
+        half = np.abs(rot @ np.array(part.size_mm)) / 2
+        out.append(f'<geom name="pv_part_{name}" type="box" size="{_v(*half)}" pos="{_v(*centre)}" mass="0" '
+                   f'rgba="{PART_RGBA.get(name, "0.3 0.3 0.3 1")}" class="visual"/>')
+        for k, (c, h) in enumerate(part.envelopes):
+            pos = np.array(centre) + rot @ np.array(c)
+            out.append(f'<geom name="pv_part_{name}_env{k}" type="box" size="{_v(*np.abs(rot @ np.array(h)))}" '
+                       f'pos="{_v(*pos)}" mass="0" rgba="{ENVELOPE_RGBA}" class="visual"/>')
+    return out
+
+
 def _torso_preview(p: BipedParams) -> str:
-    tx, ty, tz = p.torso_size_mm
+    tz = p.torso_size_mm[2]
     out = [_cover("torso", "torso", shells(p)["torso"].pos_mm)]
-    # LiPo 2S ~800 mAh (nominal 55 x 30 x 14 mm) standing against the back wall
-    out.append(f'<geom name="pv_battery" type="box" size="{_v(7, 27.5, 15)}" pos="{_v(-tx / 2 + 9, 0, 0)}" mass="0" material="battery" class="visual"/>')
-    out.append(f'<geom name="pv_esp32" type="box" size="{_v(0.8, 26, 14)}" pos="{_v(tx / 2 - 3, 0, 4)}" mass="0" material="board" class="visual"/>')
-    # on the floor between the hip servos (the shoulder servos fill the top of the torso)
-    out.append(f'<geom name="pv_mpu6050" type="box" size="{_v(10.5, 8, 0.8)}" pos="{_v(0, 0, -tz / 2 + 3)}" mass="0" material="board" class="visual"/>')
-    hip = -tz / 2 - p.hip_drop_mm
+    out += _parts_preview(body.TORSO_LAYOUT)
+    return "\n      ".join(out)
+
+
+def _pelvis_preview(p: BipedParams) -> str:
+    out = [_cover("pelvis", "pelvis", shells(p)["pelvis"].pos_mm)]
+    out += _parts_preview(body.PELVIS_LAYOUT)
+    at = (0, 0, p.pelvis_height_mm / 2 - HORN_TOP_MM + STACK_CENTRE_MM)   # horn top on the pelvis top plane
+    out.append(_servo_side("waist_yaw", 1, at, ""))
+    out.append(_vis("pv_horn_waist_yaw", "waist_yaw", 1, at, *HORN_BOX, material="horn"))
+    hip = -p.pelvis_height_mm / 2 - p.hip_drop_mm
+    first = "hip_roll" if p.hip_roll else "hip_pitch"
     for side, sign in (("l", +1), ("r", -1)):
-        out.append(_servo_side("hip_pitch", sign, (0, sign * p.hip_half_width_mm, hip), f"_{side}"))
+        out.append(_servo_side(first, sign, (0, sign * p.hip_half_width_mm, hip), f"_{side}"))
     return "\n      ".join(out)
 
 
@@ -188,8 +232,21 @@ def _leg(p: BipedParams, side: str, sign: int, preview: bool = False) -> str:
                        + _cover(f"ankle{s}", "ankle", sh["ankle"].pos_mm))
         pv["foot"] = _yoke_side("ankle_roll", sign, s)
     knee_g, ankle_pitch_g, ankle_roll_g = (p.servo(j).mass_g for j in ("knee", "ankle_pitch", "ankle_roll"))
-    return f"""
-      <body name="thigh{s}" pos="{_v(0, sign * p.hip_half_width_mm, -p.torso_size_mm[2] / 2 - p.hip_drop_mm)}">
+    hip_at = _v(0, sign * p.hip_half_width_mm, -p.pelvis_height_mm / 2 - p.hip_drop_mm)
+    head, tail, thigh_at = "", "", hip_at
+    if p.hip_roll:                       # roll block: roll yoke + hip pitch servo, like the ankle block
+        L = p.hip_roll_link_mm
+        pv_roll = (_yoke_side("hip_roll", sign, s) + _servo_side("hip_pitch", sign, (0, 0, -L), s)) if preview else ""
+        head = f"""
+      <body name="hiproll{s}" pos="{hip_at}">
+        <joint name="hip_roll{s}" class="hip_roll"/>
+        <geom name="hiproll{s}" type="box" size="{_v(10, 8, L / 2)}" pos="{_v(0, 0, -L / 2)}" mass="{_kg(p.hip_roll_struct_g + p.servo("hip_pitch").mass_g)}" material="servo" class="visual"{hide}/>
+        {pv_roll}"""
+        tail = """
+      </body>"""
+        thigh_at = _v(0, 0, -L)
+    return head + f"""
+      <body name="thigh{s}" pos="{thigh_at}">
         <joint name="hip_pitch{s}" class="hip_pitch"/>
         <geom name="thigh{s}" type="box" size="{_v(7, p.leg_width_mm / 2, p.thigh_mm / 2)}" pos="{_v(0, 0, -p.thigh_mm / 2)}" mass="{_kg(p.thigh_struct_g + c["thigh"])}" material="link" class="visual"{hide}/>
         {_hidden(_servo_geom(f"servo_knee{s}", knee_g, -p.thigh_mm + SERVO_HALF_MM[2] - 4), preview)}
@@ -211,13 +268,14 @@ def _leg(p: BipedParams, side: str, sign: int, preview: bool = False) -> str:
             </body>
           </body>
         </body>
-      </body>"""
+      </body>""" + tail
 
 
 # Arm concept (provisional, no bracket designed yet): the shoulder pitch servo sits inside the top
-# of the torso frame with its horn just outside the side wall; a shoulder link carries the shoulder
-# roll servo (holder + yoke, like a leg joint) out to the arm plane. The shoulder pitch gets the
-# 623ZZ only when both 42.5 mm stacks fit across the frame (BipedParams.shoulder_bearing).
+# of the torso frame with its horn just outside the side wall, body lying toward
+# BipedParams.shoulder_pitch_body; a shoulder link on the horn carries the shoulder roll servo
+# (holder + yoke, like a leg joint) out to the arm plane. No yoke or 623ZZ inside the torso: it would
+# sweep the top of the torso (and the head) as the arm swings — the room is for the electronics.
 def _shoulder_pitch_at(p: BipedParams, sign: int):
     """Torso-frame stack point of the shoulder pitch servo (see _place)."""
     origin_y = p.torso_top_width_mm / 2 + SHOULDER_HORN_OUT_MM - HORN_TOP_MM
@@ -231,10 +289,8 @@ def _arm_preview(p: BipedParams, sign: int, s: str) -> dict:
     tx, ty, tz = p.torso_size_mm
     at = _shoulder_pitch_at(p, sign)
     at_local = (0.0, at[1] - sign * p.shoulder_y_mm, 0.0)
-    if p.shoulder_bearing:
-        pitch = _yoke_side("shoulder_pitch", sign, s, at_local)
-    else:
-        pitch = _vis(f"pv_horn_shoulder_pitch{s}", "shoulder_pitch", sign, at_local, *HORN_BOX, material="horn")
+    pitch = _vis(f"pv_horn_shoulder_pitch{s}", "shoulder_pitch", sign, at_local, *HORN_BOX, material="horn",
+                 axes=_shoulder_pitch_axes(p, sign))
     y0 = p.torso_top_width_mm / 2 + SHOULDER_HORN_OUT_MM             # horn top -> top of the roll yoke base
     y1 = p.shoulder_y_mm - YOKE_BOXES[0][1][1]
     link_z = -YOKE_BOXES[0][0][0] + YOKE_BOXES[0][1][0]               # roll yoke base top (servo body down)
@@ -282,7 +338,7 @@ def _arm(p: BipedParams, side: str, sign: int, preview: bool = False) -> str:
         <geom name="cv_shoulder{s}" type="ellipsoid" size="{_v(*p.shoulder_cover_half_mm)}" pos="{_v(SHOULDER_ROLL_STACK_X_MM, 0, p.shoulder_cover_z_mm)}" mass="{_kg(c["shoulder"])}" {look} class="visual"/>
         {pv["shoulder"]}
         <body name="arm{s}" pos="0 0 0">
-          <joint name="shoulder_roll{s}" class="shoulder_roll" axis="{-sign} 0 0"/>
+          <joint name="shoulder_roll{s}" class="shoulder_roll" axis="{sign} 0 0"/>
           {_hidden(roll_box, preview)}
           <geom name="cv_upper_arm{s}" type="capsule" size="{_m(ru)}" fromto="0 0 0 {_v(0, 0, -p.upper_arm_cyl_mm)}" mass="{_kg(p.upper_arm_struct_g + c["upper_arm"])}" {look} class="visual"/>
           {pv["arm"]}
@@ -321,11 +377,12 @@ def _head(p: BipedParams, preview: bool) -> str:
 
 def _joint_classes(p: BipedParams) -> str:
     """One default class per joint type: axis, mechanical stop, and that joint's servo model."""
-    stops = dict(JOINT_STOPS, **(ARM_STOPS if p.arms else {}))
+    stops = dict(p.leg_stops, **(ARM_STOPS if p.arms else {}), **WAIST_STOPS)
     out = []
     for j, (lo, hi) in stops.items():
         sv = p.servo(j)
-        axis = {"ankle_roll": "1 0 0", "shoulder_roll": "1 0 0", "elbow": "0 -1 0", "wrist": "0 0 1"}.get(j, "0 1 0")
+        axis = {"ankle_roll": "1 0 0", "hip_roll": "1 0 0", "shoulder_roll": "1 0 0", "elbow": "0 -1 0", "wrist": "0 0 1",
+                "waist_yaw": "0 0 1"}.get(j, "0 1 0")
         out.append(f'    <default class="{j}"><joint axis="{axis}" range="{lo} {hi}" damping="{sv.damping:.4f}"/>'
                    f'<position forcerange="{-sv.stall_nm} {sv.stall_nm}"/></default>')
     return "\n".join(out)
@@ -333,10 +390,15 @@ def _joint_classes(p: BipedParams) -> str:
 
 def build_xml(p: BipedParams = BipedParams(), preview: bool = False) -> str:
     tx, ty, tz = p.torso_size_mm
-    torso_g = p.battery_g + p.electronics_g + p.torso_struct_g + p.covers_g["torso"]
-    stops = dict(JOINT_STOPS, **(ARM_STOPS if p.arms else {}))
+    torso_g = p.torso_struct_g + p.covers_g["torso"] + p.contents_g["torso"]
+    pelvis_g = p.pelvis_struct_g + p.covers_g["pelvis"] + p.contents_g["pelvis"]
+    stops = dict(p.leg_stops, **(ARM_STOPS if p.arms else {}))
     actuators, sensors = [], []
-    for group in (JOINT_STOPS, ARM_STOPS if p.arms else {}):
+    for j, (lo, hi) in WAIST_STOPS.items():
+        clo, chi = math.radians(lo + SOFT_MARGIN_DEG), math.radians(hi - SOFT_MARGIN_DEG)
+        actuators.append(f'    <position name="{j}" class="{j}" joint="{j}" ctrlrange="{clo:.4f} {chi:.4f}"/>')
+        sensors.append(f'    <actuatorfrc name="torque_{j}" actuator="{j}"/>')
+    for group in (p.leg_stops, ARM_STOPS if p.arms else {}):
         for side in ("l", "r"):
             for j, (lo, hi) in group.items():
                 clo, chi = math.radians(lo + SOFT_MARGIN_DEG), math.radians(hi - SOFT_MARGIN_DEG)
@@ -349,23 +411,27 @@ def build_xml(p: BipedParams = BipedParams(), preview: bool = False) -> str:
         upper += _arm(p, "l", +1, preview) + _arm(p, "r", -1, preview)
         for sd, sg in (("l", 1), ("r", -1)):
             at = _shoulder_pitch_at(p, sg)
-            # mass box roughly where the servo body sits: below the shaft, inside the wall
+            axes = _shoulder_pitch_axes(p, sg)
+            cx, cy, cz = _place("shoulder_pitch", sg, at, HOLDER_BOX[0], axes)      # mass at the servo body
             box = _hidden(_servo_geom(f"servo_shoulder_pitch_{sd}", p.servo("shoulder_pitch").mass_g,
-                                      at[2] - 5, sg * (p.torso_top_width_mm / 2 - 12)), preview)
+                                      cz, cy, cx), preview)
             if preview:
-                box += _servo_side("shoulder_pitch", sg, at, f"_{sd}")
+                box += _servo_side("shoulder_pitch", sg, at, f"_{sd}", axes)
             upper += "\n      " + box
     if p.head:
         upper += _head(p, preview)
     hip_g = p.servo("hip_pitch").mass_g
+    first = "hip_roll" if p.hip_roll else "hip_pitch"            # the servo held in the pelvis
     hip_boxes = "\n      ".join(
-        _hidden(_servo_geom(f"servo_hip_pitch_{sd}", hip_g, -tz / 2 + SERVO_HALF_MM[2], sg * p.hip_half_width_mm), preview)
+        _hidden(_servo_geom(f"servo_{first}_{sd}", hip_g, -p.pelvis_height_mm / 2 + SERVO_HALF_MM[2], sg * p.hip_half_width_mm), preview)
         for sd, sg in (("l", 1), ("r", -1)))
-    z0 = p.stand_height_mm + 1.0
+    waist_box = _hidden(_servo_geom("servo_waist_yaw", p.servo("waist_yaw").mass_g, p.pelvis_height_mm / 2 - WAIST_SERVO_Z_MM), preview)
+    ph = p.pelvis_height_mm
+    z0 = p.stand_height_mm - tz / 2 - ph / 2 + 1.0
     servo_list = ", ".join(sorted({SERVOS[k].label for k in p.servos.values()}))
     xml = f"""<!--
   GENERATED by sim/tools/build_biped.py from sim/tools/body.py - edit the parameters there, not this file.
-  F1 biped: torso + 2 legs x 4 joints (hip pitch, knee, ankle pitch, ankle roll){' + head + 2 arms x 4 joints (shoulder pitch, shoulder roll, elbow, wrist)' if p.arms else ''},
+  F1 biped: pelvis + 2 legs x 4 joints (hip pitch, knee, ankle pitch, ankle roll) + torso on a waist yaw joint{' + head + 2 arms x 4 joints (shoulder pitch, shoulder roll, elbow, wrist)' if p.arms else ''},
   simple shapes with estimated masses. Total mass {p.total_mass_g:.0f} g (covers {p.covers_total_g:.0f} g),
   height {p.total_height_mm:.0f} mm, {p.servo_count} servos ({servo_list}).
   Joint range = mechanical stop; actuator ctrlrange = software limit {SOFT_MARGIN_DEG:.0f} deg inside it.
@@ -396,12 +462,19 @@ def build_xml(p: BipedParams = BipedParams(), preview: bool = False) -> str:
   <worldbody>
     <light name="sun" pos="0.3 -0.3 1" dir="-0.3 0.3 -1" directional="true" diffuse="0.6 0.6 0.6"/>
     <geom name="floor" type="plane" size="1 1 0.1" material="floor" class="contact"/>
-    <body name="torso" pos="0 0 {_m(z0)}">
+    <body name="pelvis" pos="0 0 {_m(z0)}">
       <freejoint/>
-      <geom name="torso" type="box" size="{_v(tx / 2, ty / 2, tz / 2)}" mass="{_kg(torso_g)}" material="torso" class="contact"/>
+      <geom name="pelvis" type="box" size="{_v(p.pelvis_depth_mm / 2, p.pelvis_width_mm / 2, ph / 2)}" mass="{_kg(pelvis_g)}" material="torso" class="contact"/>
       {hip_boxes}
-      {_torso_preview(p) if preview else ""}
-      <site name="imu" pos="0 0 0" size="0.004"/>{_leg(p, "l", +1, preview)}{_leg(p, "r", -1, preview)}{upper}
+      {waist_box}
+      <site name="imu" pos="0 0 0" size="0.004"/>
+      {_pelvis_preview(p) if preview else ""}{_leg(p, "l", +1, preview)}{_leg(p, "r", -1, preview)}
+      <body name="torso" pos="{_v(0, 0, ph / 2 + tz / 2)}">
+        <joint name="waist_yaw" class="waist_yaw" pos="{_v(0, 0, -tz / 2)}"/>
+        <geom name="torso" type="box" size="{_v(tx / 2, ty / 2, tz / 2)}" mass="{_kg(torso_g)}" material="torso" class="contact"/>
+        {_torso_preview(p) if preview else ""}
+        {upper}
+      </body>
     </body>
   </worldbody>
   <actuator>
