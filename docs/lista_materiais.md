@@ -71,7 +71,7 @@ INA219 na F3.
 - [ ] **Porcas M3 autotravantes (nylon)** — pivôs não soltam com vibração
 - [ ] **Arruelas M3**
 - [ ] **Parafusos M2** (6, 8 mm) + porcas — fixações pequenas
-- [ ] **Insertos roscados M2/M3 a quente** **(opcional)** — rosca durável no plástico
+- [ ] **Insertos roscados M2/M3 a quente** **(comprado em 25/10, aguardando entrega)** — kit de 400: M2 × 2–6 mm (OD 3,5) e M3 × 3–8 mm (OD 4,2) — necessário: pino do pivô e união suporte + garfo (M3), placas (M2); furo conforme o vendedor (~4,0 mm para OD 4,2), parede ≥ 1,5–2 mm em volta
 - [ ] **Borracha antiderrapante para a sola** — 2 — EVA, borracha de câmara ou TPU impresso
 
 ## Ferramentas

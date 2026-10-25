@@ -56,7 +56,8 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Parafusaria: M3 (8/10/12/16), porcas M3 autotravantes, arruelas M3, M2 (6/8) **(você)**
 - [ ] Borracha antiderrapante para a sola **(você)**
 - [ ] INA219 — necessário para a bancada do servo (F3) **(você)**
-- [ ] Opcionais: sensores de força no pé, insertos roscados, analisador lógico **(você)**
+- [ ] Insertos M2/M3 a quente chegarem (kit de 400, comprado em 25/10) **(você)**
+- [ ] Opcionais: sensores de força no pé, analisador lógico **(você)**
 - [ ] Futuro: ESP32-CAM para a câmera na cabeça **(você)**
 
 ## 2. Simulação
