@@ -21,7 +21,7 @@ modelo de 620 g (tronco 76 × 78 × 68 mm). Para refazer: `.venv/bin/python sim/
 |---|---|
 | **Tronco** | ESP32, que gera o PWM dos 8 servos dos braços (LEDC); o HC-SR04 na cabeça |
 | **Quadril** | bateria, reguladores, placa de força, chave, MPU-6050, PCA9685 (8 servos das pernas + o da cintura) |
-| **Pela cintura** | trilho de 5 V dos servos (2 fios), 5 V da lógica, I2C (2): ~5 fios, nenhum cabo de servo |
+| **Pela cintura** | 7 fios: trilho dos servos + GND, 5 V lógica, 3,3 V, SDA, SCL, VBAT (sinal); nenhum cabo de servo ([esquema_eletrico.md](esquema_eletrico.md)) |
 
 - **I2C:** o PCA9685 (0x40) e o MPU (0x68) ficam no mesmo barramento.
 - **IMU:** fica presa às pernas; o tronco gira na cintura.

@@ -167,7 +167,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 ## 5. Eletrônica
 
-- [ ] Esquema elétrico ([alimentacao.md](alimentacao.md), divisão tronco/quadril): bateria → fusível 7,5 A → chave → UBEC 5 V / 7 A → trilho dos 17 servos (+ 2 × 1000 µF); bateria → D24V10F5 → ESP32 (tronco) + lógica do PCA9685 e MPU (quadril, I2C), HC-SR04, terra comum; pela cintura só trilho 5 V, 5 V da lógica e I2C; PG do D24V150F5 num pino do ESP32; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
+- [ ] Esquema elétrico — rascunho em [esquema_eletrico.md](esquema_eletrico.md) (25/10, gerado por `tools/wiring_diagram.py`): energia, 7 fios na cintura, pinos do ESP32 e canais do PCA9685; falta revisar juntos **(juntos)**
 - [ ] Placa de distribuição em placa perfurada **(você)**
 - [ ] Teste com fonte de bancada limitando corrente, antes da bateria **(você)**
 - [ ] Fiação no robô com extensões e organização dos cabos **(você)**
@@ -175,7 +175,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 ## 6. Firmware (ESP32)
 
 - [ ] PWM: 8 servos das pernas + cintura pelo PCA9685 (I2C, quadril); 8 servos dos braços pelo LEDC do ESP32 (tronco) **(juntos)**
-- [ ] Ligar escalonado: PCA9685 com OE desligado e saídas LEDC paradas até a 1ª posição; servos ligados em grupos de 2 a 4, ~150 ms entre grupos (sem isso, ~12 A ao ligar — [alimentacao.md](alimentacao.md)) **(juntos)**
+- [ ] Ligar escalonado: PCA9685 e LEDC ligam sem pulso (servos soltos) até a 1ª posição; servos ligados em grupos de 2 a 4, ~150 ms entre grupos (sem isso, ~12 A ao ligar — [alimentacao.md](alimentacao.md)) **(juntos)**
 - [ ] Leitura do HC-SR04: distância à frente, parar antes de obstáculo **(juntos)**
 - [ ] Calibração de cada servo: centro e limites de cada junta, salvos na memória; usar o batente como referência **(juntos)**
 - [ ] Limites de software 5° antes de cada batente, aplicados em todo comando de servo **(juntos)**
