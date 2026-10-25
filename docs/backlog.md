@@ -44,7 +44,7 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] Rolamentos 623ZZ chegarem (já comprados) **(você)**
 - [ ] Impressora 3D **(você)**
 - [ ] Filamento PETG **(você)**
-- [ ] Regulador dos servos Pololu D24V150F5 (5 V, 15 A) — decidido em 25/10 ([alimentacao.md](alimentacao.md)) **(você)**
+- [ ] Regulador dos servos: UBEC 5 V / 7 A genérico, R$ 59 — escolhido em 25/10 no lugar do D24V150F5, por custo ([alimentacao.md](alimentacao.md)) **(você)**
 - [ ] Regulador da lógica Pololu D24V10F5 (5 V, 1 A) — ESP32 fora do trilho dos servos, decidido em 25/10 **(você)**
 - [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
 - [ ] Pack 2S1P 14500 alta descarga com BMS — testar contra a LiPo; os dois com XT30 + JST-XH 3 pinos (25/10) **(você)**
@@ -85,9 +85,9 @@ Fases detalhadas em [simulacao.md](simulacao.md). Cada fase só começa quando o
   - [ ] Montar a bancada: ESP32 + INA219 + servo **(você)**
   - [ ] Firmware da bancada: degrau de posição, gravar posição e corrente **(juntos)**
   - [ ] Medir os 8 servos (+ reservas) e escolher os melhores para joelhos/tornozelos **(você)**
-  - [ ] Medir a corrente de stall real do clone e confirmar o regulador D24V150F5 ([alimentacao.md](alimentacao.md)); se passar bem de 0,75 A, rever a escolha **(você)**
+  - [ ] Medir a corrente de stall real do clone e confirmar o UBEC 5 V / 7 A ([alimentacao.md](alimentacao.md)); se passar de 0,75 A, a margem acaba e é preciso um regulador maior **(você)**
   - [ ] Modelo do servo (torque × velocidade, folga, zona morta, atraso) calibrado **(Claude)**
-  - [ ] Simular degraus de posição sem rampa com o servo calibrado (o SG90 satura e puxa o stall): pico de torque e de corrente; refazer `current_budget.py` e conferir a margem do D24V150F5 ([alimentacao.md](alimentacao.md)) **(Claude)**
+  - [ ] Simular degraus de posição sem rampa com o servo calibrado (o SG90 satura e puxa o stall): pico de torque e de corrente; refazer `current_budget.py` e conferir a margem do UBEC 5 V / 7 A ([alimentacao.md](alimentacao.md)) **(Claude)**
 - **F4 — Ponte CAD → simulação**
   - [ ] Script FreeCAD → modelo MuJoCo com massa, centro de massa e inércia de cada peça **(Claude)**
   - [ ] Conferir massa simulada × massa na balança **(você)**
@@ -167,7 +167,7 @@ Capas impressas que fecham o esqueleto e protegem circuitos, servos e fios, pres
 
 ## 5. Eletrônica
 
-- [ ] Esquema elétrico ([alimentacao.md](alimentacao.md), divisão tronco/quadril): bateria → fusível 7,5 A → chave → D24V150F5 → trilho dos 17 servos (+ 2 × 1000 µF); bateria → D24V10F5 → ESP32 (tronco) + lógica do PCA9685 e MPU (quadril, I2C), HC-SR04, terra comum; pela cintura só trilho 5 V, 5 V da lógica e I2C; PG do D24V150F5 num pino do ESP32; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
+- [ ] Esquema elétrico ([alimentacao.md](alimentacao.md), divisão tronco/quadril): bateria → fusível 7,5 A → chave → UBEC 5 V / 7 A → trilho dos 17 servos (+ 2 × 1000 µF); bateria → D24V10F5 → ESP32 (tronco) + lógica do PCA9685 e MPU (quadril, I2C), HC-SR04, terra comum; pela cintura só trilho 5 V, 5 V da lógica e I2C; PG do D24V150F5 num pino do ESP32; HC-SR04 (divisor no ECHO); divisor da bateria **(juntos)**
 - [ ] Placa de distribuição em placa perfurada **(você)**
 - [ ] Teste com fonte de bancada limitando corrente, antes da bateria **(você)**
 - [ ] Fiação no robô com extensões e organização dos cabos **(você)**

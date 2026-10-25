@@ -100,9 +100,10 @@ BODY_PARTS = {
                          envelopes=(((34.0, 0.0, 0.0), (6.0, 12.0, 7.0)), ((-29.0, 0.0, 0.0), (1.0, 15.5, 8.5))),
                          access=(1,)),
     # 2026-10-25 (user): servo rail and logic on separate regulators; docs/alimentacao.md
-    "regulador": CarriedPart("pelvis", "regulador dos servos 5 V 15 A (Pololu D24V150F5)", (43.2, 31.8, 11.0), 10.0,
-                           "Pololu D24V150F5: 43,2 × 31,8 × 11 mm; massa não informada, 10 g estimado — pesar",
-                           envelopes=(((26.6, 0.0, 0.0), (5.0, 10.0, 5.5)),)),       # wires at one end
+    # 2026-10-25 (user): generic 5 V 7 A UBEC instead of the Pololu D24V150F5 (too expensive)
+    "regulador": CarriedPart("pelvis", "UBEC 5 V 7 A (genérico, 2S–6S)", (58.0, 28.0, 6.0), 16.0,
+                           "UBEC 5,25 V / 7 A, entrada 5,5–26 V, 16 g (anúncio); 58 × 28 × 6 mm de um modelo igual — medir",
+                           envelopes=(((34.0, 0.0, 0.0), (5.0, 10.0, 4.0)),)),       # wires at one end
     "regulador_logica": CarriedPart("pelvis", "regulador da lógica 5 V 1 A (Pololu D24V10F5)", (18.0, 13.0, 3.5), 1.0,
                                   "Pololu D24V10F5: 18 × 13 × 3,5 mm; massa não informada, 1 g estimado — pesar",
                                   envelopes=(((12.0, 0.0, 0.0), (3.0, 5.0, 3.0)),)),  # wires at one end
@@ -123,14 +124,14 @@ WIRING_G = {"torso": 3.0, "pelvis": 6.0}   # power leads, I2C, signals (servo ca
 TORSO_LAYOUT = {                 # torso_layout.py --search, 2026-10-25
     "controle": ((-6.0, -6.0, -4.0), ((0, 1, 0), (-1, 0, 0), (0, 0, 1))),
 }
-PELVIS_LAYOUT = {                # torso_layout.py --seat pelvis --search, 2026-10-25
+PELVIS_LAYOUT = {                # torso_layout.py --seat pelvis --search, 2026-10-25 (UBEC 5 V / 7 A)
     "pca9685": ((-30.0, -13.0, 11.0), ((0, 0, 1), (-1, 0, 0), (0, -1, 0))),
     "bateria": ((-6.0, 28.0, 8.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
-    "regulador": ((14.0, -38.0, 8.0), ((-1, 0, 0), (0, 0, 1), (0, 1, 0))),
-    "distribuicao": ((12.0, -24.0, 8.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
-    "chave": ((-26.0, 34.0, -16.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
-    "mpu6050": ((18.0, 0.0, -14.0), ((0, 1, 0), (1, 0, 0), (0, 0, -1))),
-    "regulador_logica": ((32.0, -34.0, -16.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
+    "regulador": ((-6.0, 40.0, 2.0), ((1, 0, 0), (0, 0, 1), (0, -1, 0))),
+    "distribuicao": ((28.0, -28.0, 0.0), ((0, 0, 1), (0, 1, 0), (-1, 0, 0))),
+    "chave": ((26.0, 26.0, -16.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
+    "mpu6050": ((0.0, -18.0, -6.0), ((1, 0, 0), (0, 1, 0), (0, 0, 1))),
+    "regulador_logica": ((-32.0, 28.0, -18.0), ((0, 0, 1), (1, 0, 0), (0, 1, 0))),
 }
 
 
