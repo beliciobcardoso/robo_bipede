@@ -135,7 +135,7 @@ junta (fica à mostra como as outras juntas).
 
 Decisões do dia (você):
 - **Rotação da cintura:** o tronco gira ±45° sobre o quadril. É o 17º SG90, preso no quadril em cima dos dois do quadril pitch.
-- **Divisão da eletrônica:** no quadril, bateria (com gaveta pela traseira), reguladores, MPU e o PCA9685 das pernas. No tronco, o ESP32, que gera o PWM dos braços. Pela cintura passam só 5 fios.
+- **Divisão da eletrônica:** no quadril, bateria (com gaveta pela traseira), reguladores, MPU e o PCA9685 das pernas. No tronco, o ESP32, que gera o PWM dos braços. Pela cintura passam só 7 fios ([esquema_eletrico.md](esquema_eletrico.md)).
 - **Capas de 0,8 mm.**
 - **Tronco em V (variante B).**
 
