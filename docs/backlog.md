@@ -49,7 +49,7 @@ Detalhes e quantidades em [lista_materiais.md](lista_materiais.md).
 - [ ] LiPo 2S ~800 mAh, ~55 g (se a bateria atual for 2× 18650) **(você)**
 - [ ] Pack 2S1P 14500 alta descarga com BMS — testar contra a LiPo; os dois com XT30 + JST-XH 3 pinos (25/10) **(você)**
 - [ ] Comparar as duas baterias na bancada: queda de tensão a 5–6 A, autonomia, temperatura; escolher uma **(juntos)**
-- [ ] 8 servos SG90 para os braços + reservas novas **(você)**
+- [ ] SG90: o robô usa 17 (8 pernas, 8 braços, 1 cintura) + 2 a 4 reservas; você tem 4 → comprar **15 a 17**, de preferência do mesmo lote **(você)**
 - [ ] PCA9685 — no quadril, para os 8 servos das pernas + o da cintura; os 8 dos braços vão direto no LEDC do ESP32, no tronco (25/10) **(você)**
 - [ ] HC-SR04 **(você)**
 - [ ] Fusível 7,5 A de ação retardada no lugar do de 5 A — decidido em 25/10 **(você)**

@@ -7,17 +7,18 @@ pela forma, tronco em V — 25/10). **SG90 em todas as juntas** (decisão de
 24/10): joelho e tornozelo roll ficam no limite a 1 passo/s e com folga a 0,5 passo/s — ver
 [arquitetura_corpo.md](arquitetura_corpo.md).
 
-> **Configuração: 16 servos SG90** — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll;
+> **Configuração: 17 servos SG90** (16 + 1 na cintura, 25/10) — por perna: quadril pitch, joelho, tornozelo pitch, tornozelo roll;
 > por braço: ombro pitch, ombro roll, cotovelo, punho (gira). Mão fixa. Cabeça fixa com o sensor
 > ultrassônico (aprovado em 24/10).
 
 
 ## Atuadores
 
-- [X] **Servo SG90 (clone)** — 8 — juntas das pernas
+- [ ] **Servo SG90 (clone)** — 8 — juntas das pernas (você tem 4 em mãos, 25/10)
 - [ ] **Servo SG90 (clone) para os braços** — 8 — ombro pitch, ombro roll, cotovelo e punho de cada
   braço; comprar também reservas novas (as atuais não devem virar servo de braço)
-- [X] **Servo SG90 reserva** — 2 a 4 — engrenagem plástica de clone espana; ter reserva evita parar o projeto
+- [ ] **Servo SG90 (clone) para a cintura** — 1 — gira o tronco ±45° sobre o quadril (decidido em 25/10)
+- [ ] **Servo SG90 reserva** — 2 a 4 — engrenagem plástica de clone espana; ter reserva evita parar o projeto
 - [X] **Horns** (braço simples e cruz) — vêm com o servo — fixação no eixo
 - [X] **Parafusos do servo** (abas + horn) — vêm com o servo
 
